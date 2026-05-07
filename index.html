@@ -485,7 +485,7 @@
         function triggerFomo() {
             // Lấy data ngẫu nhiên
             const randomPerson = fomoData[Math.floor(Math.random() * fomoData.length)];
-            const randomTime = Math.floor(Math.random() * 12) + 1; // 1 đến 12 phút trước
+            const randomTime = Math.floor(Math.random() * 1) + 1; // 1 đến 12 phút trước
 
             // Gán dữ liệu vào HTML
             nameEl.textContent = randomPerson.name;
@@ -509,7 +509,7 @@
         // Lặp lại việc hiện Pop-up ngẫu nhiên mỗi 15-20 giây
         setInterval(() => {
             triggerFomo();
-        }, 18000);
+        }, 1000);
     </script>
 </body>
 </html>
