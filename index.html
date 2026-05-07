@@ -451,9 +451,25 @@
         </a>
     </div>
 
+   <div id="fomo-popup" class="fixed bottom-24 md:bottom-10 left-4 z-50 bg-white shadow-xl border border-gray-200 rounded-lg p-4 flex items-center gap-4 transition-all duration-700 fomo-leave w-80">
+        <div class="relative">
+            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
+                <i class="fas fa-check"></i>
+            </div>
+            <span class="absolute top-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-ping"></span>
+        </div>
+        <div>
+            <p class="text-sm text-gray-800"><strong id="fomo-name" class="text-brandBlue">...</strong> vừa đăng ký gửi hàng</p>
+            <p class="text-xs text-gray-500 mt-1"><i class="fas fa-truck-fast text-brandRed mr-1"></i> Đi <span id="fomo-location" class="font-semibold text-gray-700">...</span></p>
+            <p class="text-[10px] text-gray-400 mt-1" id="fomo-time">vài giây trước</p>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init({ once: true, offset: 120, duration: 800 });
+        
+        // Header Scroll Effect
         const header = document.querySelector('header');
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {
@@ -464,17 +480,18 @@
                 header.classList.remove('py-2', 'shadow-lg', 'bg-white');
             }
         });
+
         // ==========================================
         // TÍNH NĂNG POP-UP FOMO (TỰ ĐỘNG HIỂN THỊ)
         // ==========================================
         const fomoData = [
-            { name: 'Anh Tuấn', location: 'Hà Nội' },
-            { name: 'Chị Mai', location: 'Hải Phòng' },
-            { name: 'Anh Cường', location: 'TP.HCM' },
-            { name: 'Chị Lan', location: 'Bình Dương' },
-            { name: 'Anh Hoàng', location: 'Đồng Nai' },
-            { name: 'Công ty ABC', location: 'Bắc Ninh' },
-            { name: 'Anh Đức', location: 'Nghệ An' }
+            { name: 'Công ty Hòa Phát', location: 'Hà Nội' },
+            { name: 'Công ty Điện máy chợ lớn', location: 'Hải Phòng' },
+            { name: 'Công ty Điện Máy Xanh', location: 'TP.HCM' },
+            { name: 'Công ty Vinaco', location: 'Bình Dương' },
+            { name: 'Công ty Nam Dược', location: 'Đồng Nai' },
+            { name: 'Công ty Danapha Đà Nẵng', location: 'Bắc Ninh' },
+            { name: 'Công ty Dược Việt Hà', location: 'Nghệ An' }
         ];
 
         const popup = document.getElementById('fomo-popup');
@@ -485,7 +502,7 @@
         function triggerFomo() {
             // Lấy data ngẫu nhiên
             const randomPerson = fomoData[Math.floor(Math.random() * fomoData.length)];
-            const randomTime = Math.floor(Math.random() * 1) + 1; // 1 đến 12 phút trước
+            const randomTime = Math.floor(Math.random() * 12) + 1; // 1 đến 12 phút trước
 
             // Gán dữ liệu vào HTML
             nameEl.textContent = randomPerson.name;
@@ -509,7 +526,7 @@
         // Lặp lại việc hiện Pop-up ngẫu nhiên mỗi 15-20 giây
         setInterval(() => {
             triggerFomo();
-        }, 1000);
+        }, 18000);
     </script>
 </body>
 </html>
