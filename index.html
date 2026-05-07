@@ -464,6 +464,52 @@
                 header.classList.remove('py-2', 'shadow-lg', 'bg-white');
             }
         });
+        // ==========================================
+        // TÍNH NĂNG POP-UP FOMO (TỰ ĐỘNG HIỂN THỊ)
+        // ==========================================
+        const fomoData = [
+            { name: 'Anh Tuấn', location: 'Hà Nội' },
+            { name: 'Chị Mai', location: 'Hải Phòng' },
+            { name: 'Anh Cường', location: 'TP.HCM' },
+            { name: 'Chị Lan', location: 'Bình Dương' },
+            { name: 'Anh Hoàng', location: 'Đồng Nai' },
+            { name: 'Công ty ABC', location: 'Bắc Ninh' },
+            { name: 'Anh Đức', location: 'Nghệ An' }
+        ];
+
+        const popup = document.getElementById('fomo-popup');
+        const nameEl = document.getElementById('fomo-name');
+        const locEl = document.getElementById('fomo-location');
+        const timeEl = document.getElementById('fomo-time');
+
+        function triggerFomo() {
+            // Lấy data ngẫu nhiên
+            const randomPerson = fomoData[Math.floor(Math.random() * fomoData.length)];
+            const randomTime = Math.floor(Math.random() * 12) + 1; // 1 đến 12 phút trước
+
+            // Gán dữ liệu vào HTML
+            nameEl.textContent = randomPerson.name;
+            locEl.textContent = randomPerson.location;
+            timeEl.textContent = `${randomTime} phút trước`;
+
+            // Hiển thị Pop-up
+            popup.classList.remove('fomo-leave');
+            popup.classList.add('fomo-enter');
+
+            // Ẩn Pop-up sau 5 giây
+            setTimeout(() => {
+                popup.classList.remove('fomo-enter');
+                popup.classList.add('fomo-leave');
+            }, 5000);
+        }
+
+        // Khởi chạy Pop-up lần đầu sau 4 giây khi vào web
+        setTimeout(triggerFomo, 4000);
+
+        // Lặp lại việc hiện Pop-up ngẫu nhiên mỗi 15-20 giây
+        setInterval(() => {
+            triggerFomo();
+        }, 18000);
     </script>
 </body>
 </html>
