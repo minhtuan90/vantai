@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://vantai.danang.vn/sitemap.xml
