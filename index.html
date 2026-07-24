@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <title>Vận Tải Uy Tín - Vận Chuyển Đà Nẵng Đi Toàn Quốc</title>
-    <meta name="description" content="Vận Tải Uy Tín. Cung cấp dịch vụ vận tải hàng hóa đường bộ, đường sắt, hàng không và kho bãi toàn quốc. Uy tín, an toàn, tốc độ.">
+    <title>Vận Tải Uy Tín | Đối Tác Logistics Chiến Lược Cho Doanh Nghiệp</title>
+    <meta name="description" content="Vận Tải Uy Tín cung cấp giải pháp vận tải hàng hóa B2B toàn diện. Kết nối chuỗi cung ứng từ Đà Nẵng đi toàn quốc an toàn, đúng tiến độ.">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,402 +14,440 @@
         theme: { 
             extend: { 
                 colors: { 
-                    brandCyan: '#00e5ff', 
-                    brandDark: '#010c14', 
-                    brandCard: '#041322' 
+                    corpBlue: '#1d4ed8',     /* Xanh dương đậm tin cậy */
+                    corpDark: '#0f172a',     /* Đen xám doanh nghiệp */
+                    corpLight: '#f8fafc',    /* Trắng xám nền */
+                    corpAccent: '#f59e0b'    /* Vàng cam điểm nhấn */
                 },
                 fontFamily: {
-                    sans: ['Inter', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                    sans: ['Inter', 'system-ui', 'sans-serif'],
                 }
             } 
         } 
     }
     </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
-        /* CẤU HÌNH GIAO DIỆN & CHỐNG TRÀN */
-        html, body { overflow-x: hidden !important; width: 100%; max-width: 100vw; position: relative; color: #cbd5e1; background-color: #010c14; }
+        /* BASE STYLES */
+        html, body { overflow-x: hidden !important; width: 100%; max-width: 100vw; position: relative; color: #334155; background-color: #f8fafc; font-family: 'Inter', sans-serif; }
         body { -webkit-user-select: none; user-select: none; }
         img { -webkit-user-drag: none; pointer-events: none; }
 
-        /* SPA Router chuyển trang mượt */
-        .page-content { display: none; opacity: 0; transition: opacity 0.4s ease-in-out; }
-        .page-content.active { display: block; opacity: 1; animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* SPA TRANSITION */
+        .page-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .page-content.active { display: block; opacity: 1; animation: fadeUp 0.4s ease-out forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Menu Navigation */
-        .menu-link { position: relative; color: #94a3b8; transition: all 0.3s; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .menu-link:hover { color: #00e5ff; text-shadow: 0 0 10px rgba(0,229,255,0.8); }
-        .menu-link::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 3px; background-color: #00e5ff; box-shadow: 0 0 10px #00e5ff; transition: width 0.3s ease; }
-        .menu-link.active::after { width: 100%; }
-        .menu-link.active { color: #00e5ff; font-weight: 900; text-shadow: 0 0 10px rgba(0,229,255,0.8); }
+        /* NAVIGATION */
+        .menu-link { position: relative; color: #475569; transition: color 0.2s; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .menu-link:hover { color: #1d4ed8; }
+        .menu-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background-color: #1d4ed8; transition: width 0.3s ease; }
+        .menu-link:hover::after, .menu-link.active::after { width: 100%; }
+        .menu-link.active { color: #1d4ed8; }
 
-        /* Banner Background Mờ */
+        /* HERO SECTION */
         .hero-bg {
-            background-image: linear-gradient(180deg, rgba(1, 12, 20, 0.8) 0%, rgba(1, 12, 20, 0.95) 100%), url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
-            background-size: cover; background-position: center; background-attachment: fixed;
+            background-image: linear-gradient(to right, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.7) 100%), url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover; background-position: center;
+        }
+        .page-header-bg {
+            background-image: linear-gradient(to right, rgba(29, 78, 216, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%), url('https://images.unsplash.com/photo-1519003722824-194d4455a60c?ixlib=rb-1.2.1&auto=format&fit=crop&w=2000&q=80');
+            background-size: cover; background-position: center;
         }
 
-        /* Typography Chuẩn Ảnh (Glowing & Skew) */
-        .glow-text-cyan {
-            color: #00e5ff;
-            text-shadow: 0 0 15px rgba(0, 229, 255, 0.6), 0 0 30px rgba(0, 229, 255, 0.4);
+        /* UI COMPONENTS */
+        .corp-card {
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); transition: all 0.3s ease;
         }
-        .glow-text-white {
-            color: #ffffff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
+        .corp-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border-color: #cbd5e1; }
+        
+        .btn-primary { background-color: #1d4ed8; color: #ffffff; font-weight: 600; border-radius: 0.5rem; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.3); }
+        .btn-primary:hover { background-color: #1e40af; box-shadow: 0 6px 12px -2px rgba(29, 78, 216, 0.4); transform: translateY(-1px); }
+        
+        .btn-outline { background-color: transparent; color: #1d4ed8; font-weight: 600; border: 1px solid #1d4ed8; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-outline:hover { background-color: #eff6ff; }
+        
+        .btn-white { background-color: #ffffff; color: #0f172a; font-weight: 600; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-white:hover { background-color: #f8fafc; color: #1d4ed8; }
 
-        /* Nút Bấm Vát Góc (Skew Buttons) */
-        .btn-skew-solid {
-            background: linear-gradient(90deg, #00d2ff, #0088cc);
-            color: #ffffff;
-            transform: skew(-10deg);
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 229, 255, 0.2);
-            border: 1px solid #00e5ff;
-        }
-        .btn-skew-solid:hover { background: #00e5ff; box-shadow: 0 0 20px rgba(0, 229, 255, 0.6); color: #010c14; }
-        .btn-skew-solid span { display: inline-block; transform: skew(10deg); }
-
-        .btn-skew-outline {
-            background: rgba(0, 0, 0, 0.3);
-            color: #00e5ff;
-            border: 1px solid #00e5ff;
-            transform: skew(-10deg);
-            transition: all 0.3s ease;
-        }
-        .btn-skew-outline:hover { background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
-        .btn-skew-outline span { display: inline-block; transform: skew(10deg); }
-
-        /* Thẻ Glassmorphism Sạch sẽ */
-        .glass-card {
-            background: rgba(4, 19, 34, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 229, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-        }
-        .glass-card:hover {
-            border-color: rgba(0, 229, 255, 0.5);
-            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
-        }
+        /* FORM INPUTS */
+        .form-input { w-full; padding: 0.75rem 1rem; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 0.5rem; color: #334155; transition: all 0.2s; }
+        .form-input:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1); background-color: #ffffff; }
     </style>
 </head>
-<body class="font-sans antialiased overflow-x-hidden flex flex-col min-h-screen">
+<body class="antialiased flex flex-col min-h-screen">
 
-    <!-- HEADER MENU -->
-    <header class="fixed w-full z-50 transition-all duration-300 bg-[#010c14]/95 backdrop-blur-md shadow-lg border-b border-brandCyan/20" id="main-header">
-        <div class="container mx-auto px-4 md:px-6 py-3 flex justify-between items-center relative z-10">
+    <!-- HEADER / NAVIGATION -->
+    <header class="fixed w-full z-50 transition-all duration-300 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100" id="main-header">
+        <div class="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center relative">
             <a href="#trang-chu" class="flex items-center gap-3 cursor-pointer">
-                <i class="fas fa-boxes-stacked text-4xl text-brandCyan drop-shadow-[0_0_8px_rgba(0,229,255,0.6)]"></i>
+                <div class="w-10 h-10 bg-corpBlue rounded flex items-center justify-center text-white">
+                    <i class="fas fa-cubes text-xl"></i>
+                </div>
                 <div class="flex flex-col">
-                    <span class="text-2xl font-black text-white leading-none uppercase tracking-widest drop-shadow-md">VẬN TẢI <span class="text-brandCyan">UY TÍN</span></span>
-                    <span class="text-[9px] text-brandCyan font-bold tracking-[0.3em] mt-1">LOGISTICS & SUPPLY CHAIN</span>
+                    <span class="text-xl font-black text-corpDark leading-none uppercase tracking-tight">VẬN TẢI <span class="text-corpBlue">UY TÍN</span></span>
+                    <span class="text-[10px] text-gray-500 font-semibold tracking-[0.2em] mt-1 uppercase">Logistics Partner</span>
                 </div>
             </a>
             <nav class="hidden md:flex space-x-8 items-center">
-                <a href="#trang-chu" class="transition py-2 menu-link active">Trang Chủ</a>
-                <a href="#gioi-thieu" class="transition py-2 menu-link">Giới Thiệu</a>
-                <a href="#dich-vu" class="transition py-2 menu-link">Dịch Vụ</a>
-                <a href="#bang-gia" class="transition py-2 menu-link">Bảng Giá</a>
-                <a href="#noi-bo" class="text-gray-500 hover:text-brandCyan transition py-2 menu-link"><i class="fas fa-user-shield mr-1"></i> Admin</a>
-                <a href="tel:0965.390.330" class="btn-skew-solid px-6 py-2 transition ml-4 flex items-center justify-center">
-                    <span class="font-bold text-sm tracking-widest"><i class="fas fa-phone-volume animate-pulse mr-2"></i> 0965.390.330</span>
+                <a href="#trang-chu" class="menu-link active">Trang Chủ</a>
+                <a href="#gioi-thieu" class="menu-link">Doanh Nghiệp</a>
+                <a href="#dich-vu" class="menu-link">Giải Pháp</a>
+                <a href="#bang-gia" class="menu-link">Bảng Giá</a>
+                <a href="#noi-bo" class="text-gray-400 hover:text-corpBlue transition text-sm font-semibold uppercase tracking-wider flex items-center gap-1"><i class="fas fa-lock text-xs"></i> Admin</a>
+                <a href="#bao-gia" onclick="navigate()" class="btn-primary px-6 py-2.5 text-sm uppercase tracking-wide ml-4">
+                    Nhận Báo Giá
                 </a>
             </nav>
-            <button class="md:hidden text-brandCyan focus:outline-none"><i class="fas fa-bars text-3xl drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]"></i></button>
+            <button class="md:hidden text-corpDark focus:outline-none text-2xl"><i class="fas fa-bars"></i></button>
         </div>
     </header>
 
-    <main class="flex-grow pt-16">
+    <main class="flex-grow pt-[72px]">
         
         <!-- ========================================== -->
-        <!-- 1. TRANG CHỦ (BÁM SÁT ẢNH IMAGE_4.PNG) -->
+        <!-- 1. TRANG CHỦ (HOME B2B) -->
         <!-- ========================================== -->
         <div id="trang-chu" class="page-content active">
-            <!-- HERO BANNER -->
-            <section class="hero-bg min-h-[90vh] flex items-center justify-center relative pt-10 pb-16">
-                <!-- Hiệu ứng tỏa sáng sau lưng chữ -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80vw] md:w-[600px] h-[400px] bg-brandCyan/10 rounded-full blur-[80px] pointer-events-none"></div>
-
-                <div class="container mx-auto px-6 relative z-10 flex flex-col items-center text-center" data-aos="zoom-in" data-aos-duration="1000">
-                    
-                    <!-- Tagline Box -->
-                    <div class="mb-6 transform skew-x-[-10deg] border border-brandCyan rounded px-5 py-1.5 backdrop-blur-sm bg-brandCyan/5">
-                        <span class="text-white text-xs md:text-sm font-bold tracking-widest transform skew-x-[10deg] inline-block">YOUR LOADS. OUR ROADS.</span>
-                    </div>
-                    
-                    <!-- CHỮ 3D CHUẨN MẪU -->
-                    <h1 class="text-[3rem] md:text-[6rem] font-black italic leading-[1.1] mb-10 transform skew-x-[-10deg] flex flex-col items-center">
-                        <span class="glow-text-cyan tracking-tight">VẬN CHUYỂN</span>
-                        <span class="glow-text-white tracking-wide">HÀNG HOÁ</span>
-                        <span class="glow-text-cyan tracking-tighter text-[2.5rem] md:text-[5rem]">ĐÀ NẴNG ĐI TOÀN</span>
-                        <span class="glow-text-cyan tracking-tight">QUỐC</span>
-                    </h1>
-                    
-                    <!-- Khung Cam Kết -->
-                    <div class="bg-black/40 border-l-[3px] border-brandCyan px-6 py-4 mb-10 backdrop-blur-md max-w-lg w-full text-center md:text-left shadow-lg">
-                        <p class="text-sm md:text-base font-medium tracking-wide leading-relaxed text-gray-200">
-                            <span class="text-brandCyan font-bold">CAM KẾT:</span> An Toàn - Tốc Độ - Tối Ưu Chi Phí Tại Việt Nam 2026
+            <!-- HERO SECTION -->
+            <section class="hero-bg min-h-[85vh] flex items-center relative">
+                <div class="container mx-auto px-6 py-20 relative z-10 flex flex-col md:flex-row items-center gap-12">
+                    <div class="md:w-3/5 text-left" data-aos="fade-up" data-aos-duration="1000">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-400/30 text-blue-200 text-xs font-semibold uppercase tracking-widest mb-6">
+                            <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span> Giải pháp chuỗi cung ứng
+                        </div>
+                        <h1 class="text-4xl md:text-[3.5rem] font-black leading-[1.1] mb-6 text-white tracking-tight">
+                            ĐỐI TÁC VẬN TẢI CHIẾN LƯỢC <br>
+                            <span class="text-blue-400">CHO DOANH NGHIỆP</span>
+                        </h1>
+                        <p class="text-lg text-gray-300 font-normal leading-relaxed mb-10 max-w-2xl">
+                            Vận Tải Uy Tín cung cấp giải pháp vận chuyển hàng hóa chuyên nghiệp từ Đà Nẵng đi các tỉnh miền Bắc và miền Nam. Đảm bảo luồng giao thương an toàn, minh bạch và đúng tiến độ.
                         </p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="#bao-gia" class="btn-primary py-3.5 px-8 text-center uppercase tracking-wide">Yêu cầu tư vấn</a>
+                            <a href="#tracking" class="btn-white py-3.5 px-8 text-center uppercase tracking-wide flex items-center justify-center gap-2"><i class="fas fa-search"></i> Tra cứu vận đơn</a>
+                        </div>
                     </div>
-                    
-                    <!-- Buttons -->
-                    <div class="flex flex-col w-full max-w-sm gap-4">
-                        <a href="#bao-gia" class="btn-skew-solid py-4 w-full text-center cursor-pointer shadow-lg shadow-brandCyan/20">
-                            <span class="font-bold tracking-widest text-sm md:text-base uppercase">NHẬN BÁO GIÁ NGAY</span>
-                        </a>
-                        <a href="#tracking" class="btn-skew-outline py-4 w-full text-center cursor-pointer shadow-lg shadow-black">
-                            <span class="font-bold tracking-widest text-sm md:text-base uppercase">TRA CỨU VẬN ĐƠN</span>
-                        </a>
+                    <div class="md:w-2/5 hidden md:block" data-aos="fade-left" data-aos-duration="1000">
+                        <!-- Có thể để khoảng trống hoặc thêm khối thống kê nhỏ -->
+                        <div class="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+                                    <div class="text-3xl font-black text-white mb-1">63</div>
+                                    <div class="text-xs text-blue-200 uppercase tracking-wider">Tỉnh thành</div>
+                                </div>
+                                <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+                                    <div class="text-3xl font-black text-white mb-1">24/7</div>
+                                    <div class="text-xs text-blue-200 uppercase tracking-wider">Vận hành</div>
+                                </div>
+                                <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center col-span-2">
+                                    <div class="text-3xl font-black text-white mb-1">100%</div>
+                                    <div class="text-xs text-blue-200 uppercase tracking-wider">Bảo hiểm hàng hóa</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- TRACKING BOX CHUYÊN NGHIỆP -->
-            <section class="relative z-30 -mt-10 mb-20" id="tracking">
-                <div class="container mx-auto px-6">
-                    <div class="glass-card rounded-xl p-8 md:p-10 max-w-5xl mx-auto border-t-2 border-brandCyan" data-aos="fade-up">
-                        <h2 class="text-2xl font-black text-white uppercase tracking-widest flex items-center gap-3 mb-2"><i class="fas fa-search-location text-brandCyan"></i> Kiểm Tra Lộ Trình</h2>
-                        <p class="text-gray-400 mb-6 text-sm">Nhập mã vận đơn để hệ thống định vị thời gian thực.</p>
-                        
-                        <form class="flex flex-col md:flex-row gap-4" onsubmit="handleTrackOrder(event)">
-                            <div class="flex-1 relative">
-                                <i class="fas fa-barcode absolute left-5 top-1/2 transform -translate-y-1/2 text-brandCyan/70 text-xl"></i>
-                                <input id="tracking-input" type="text" placeholder="VD: VTLOG-XXXXX" class="w-full pl-14 pr-6 py-4 bg-[#01060a] border border-gray-700 text-brandCyan placeholder-gray-600 rounded focus:outline-none focus:border-brandCyan focus:shadow-[0_0_10px_rgba(0,229,255,0.2)] transition text-base font-bold uppercase tracking-widest" required>
-                            </div>
-                            <button id="btn-track" type="submit" class="btn-skew-solid px-12 py-4"><span class="font-bold tracking-widest flex items-center gap-2"><i class="fas fa-search"></i> TRA CỨU</span></button>
-                        </form>
-                        <div id="tracking-msg" class="hidden mt-6 bg-[#01060a] border border-brandCyan/30 p-6 rounded text-left shadow-inner"></div>
+            <!-- TRACKING TÍCH HỢP -->
+            <section class="relative z-20 -mt-12 mb-20 px-4" id="tracking">
+                <div class="container mx-auto max-w-5xl">
+                    <div class="corp-card p-6 md:p-8 flex flex-col md:flex-row items-center gap-6" data-aos="fade-up">
+                        <div class="w-full md:w-1/3">
+                            <h2 class="text-xl font-bold text-corpDark flex items-center gap-2"><i class="fas fa-map-marker-alt text-corpBlue"></i> Tra cứu đơn hàng</h2>
+                            <p class="text-sm text-gray-500 mt-1">Hệ thống theo dõi lộ trình thời gian thực.</p>
+                        </div>
+                        <div class="w-full md:w-2/3">
+                            <form class="flex flex-col sm:flex-row gap-3 w-full" onsubmit="handleTrackOrder(event)">
+                                <div class="flex-1 relative">
+                                    <i class="fas fa-barcode absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <input id="tracking-input" type="text" placeholder="Nhập mã vận đơn (VD: VTLOG-...)" class="form-input pl-11 w-full font-semibold uppercase tracking-wider" required>
+                                </div>
+                                <button id="btn-track" type="submit" class="btn-primary py-3 px-8 whitespace-nowrap"><i class="fas fa-search mr-2"></i> Kiểm Tra</button>
+                            </form>
+                        </div>
                     </div>
+                    <div id="tracking-msg" class="hidden mt-4 corp-card p-6 border-l-4 border-corpBlue text-left"></div>
                 </div>
             </section>
 
-            <!-- NĂNG LỰC DOANH NGHIỆP -->
-            <section class="py-16" id="nang-luc">
+            <!-- LÝ DO CHỌN CHÚNG TÔI -->
+            <section class="py-16 bg-white" id="nang-luc">
                 <div class="container mx-auto px-6">
-                    <div class="text-center mb-16" data-aos="fade-up">
-                        <span class="text-brandCyan font-bold uppercase tracking-[0.2em] mb-2 block text-xs">Vận Hành Chuyên Nghiệp</span>
-                        <h2 class="text-3xl md:text-4xl font-black uppercase text-white tracking-widest">Năng Lực <span class="text-brandCyan">Thực Tế</span></h2>
-                        <div class="w-16 h-1 bg-brandCyan mx-auto mt-4 shadow-[0_0_10px_#00e5ff]"></div>
+                    <div class="text-center mb-16 max-w-3xl mx-auto" data-aos="fade-up">
+                        <h2 class="text-sm font-bold text-corpBlue uppercase tracking-widest mb-2">Năng Lực Đáp Ứng</h2>
+                        <h3 class="text-3xl font-black text-corpDark mb-4">Đối tác tin cậy của chuỗi cung ứng</h3>
+                        <p class="text-gray-600">Chúng tôi xây dựng hệ thống vận hành tập trung vào sự ổn định, an toàn và tối ưu hóa chi phí cho các doanh nghiệp sản xuất và thương mại.</p>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up" data-aos-delay="100">
-                        <div class="glass-card p-8 rounded-xl group border border-gray-800">
-                            <div class="w-14 h-14 bg-brandCyan/10 border border-brandCyan/30 flex items-center justify-center rounded-lg mb-6 group-hover:bg-brandCyan/20 transition">
-                                <i class="fas fa-truck-fast text-2xl text-brandCyan"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="corp-card p-8" data-aos="fade-up" data-aos-delay="100">
+                            <div class="w-12 h-12 bg-blue-50 text-corpBlue rounded-lg flex items-center justify-center text-2xl mb-6">
+                                <i class="fas fa-truck-fast"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-wider">Hạm Đội >200 Xe</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">Trang bị GPS trực tuyến. Đa dạng tải trọng từ 1.5 Tấn đến Đầu kéo, chạy liên tục Bắc - Nam 24/7.</p>
+                            <h4 class="text-lg font-bold text-corpDark mb-3">Mạng Lưới Phương Tiện</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed">Sở hữu hơn 200 đầu xe tải từ 1.5 tấn đến xe đầu kéo container. Đáp ứng linh hoạt từ các chuyến hàng lẻ ghép chuyến đến bao xe nguyên chuyến hằng ngày.</p>
                         </div>
-                        <div class="glass-card p-8 rounded-xl group border border-gray-800">
-                            <div class="w-14 h-14 bg-brandCyan/10 border border-brandCyan/30 flex items-center justify-center rounded-lg mb-6 group-hover:bg-brandCyan/20 transition">
-                                <i class="fas fa-warehouse text-2xl text-brandCyan"></i>
+                        <div class="corp-card p-8" data-aos="fade-up" data-aos-delay="200">
+                            <div class="w-12 h-12 bg-blue-50 text-corpBlue rounded-lg flex items-center justify-center text-2xl mb-6">
+                                <i class="fas fa-warehouse"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-wider">Kho Bãi Trung Tâm</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">Tổng kho >10.000m2 tại KCN Hòa Cầm Đà Nẵng và Hà Nội, trang bị hệ thống xe nâng hạ công suất lớn.</p>
+                            <h4 class="text-lg font-bold text-corpDark mb-3">Hạ Tầng Kho Bãi</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed">Hệ thống kho trung chuyển tiêu chuẩn tại Đà Nẵng, Hà Nội, TP.HCM trang bị xe nâng hạ công suất lớn, hệ thống PCCC an toàn, camera giám sát 24/7.</p>
                         </div>
-                        <div class="glass-card p-8 rounded-xl group border border-gray-800">
-                            <div class="w-14 h-14 bg-brandCyan/10 border border-brandCyan/30 flex items-center justify-center rounded-lg mb-6 group-hover:bg-brandCyan/20 transition">
-                                <i class="fas fa-shield-halved text-2xl text-brandCyan"></i>
+                        <div class="corp-card p-8" data-aos="fade-up" data-aos-delay="300">
+                            <div class="w-12 h-12 bg-blue-50 text-corpBlue rounded-lg flex items-center justify-center text-2xl mb-6">
+                                <i class="fas fa-file-contract"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-white mb-3 uppercase tracking-wider">Bảo Hiểm 100%</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">Kẹp chì niêm phong hàng hóa. Cam kết đền bù thiệt hại theo đúng giá trị kê khai hoàn toàn minh bạch.</p>
+                            <h4 class="text-lg font-bold text-corpDark mb-3">Cam Kết Bồi Thường</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed">Mọi quy trình giao nhận đều được chuẩn hóa bằng biên bản điện tử. Cam kết đền bù 100% giá trị hàng hóa nếu xảy ra rủi ro trong quá trình vận chuyển.</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ĐỐI TÁC TIÊU BIỂU (Mô phỏng B2B) -->
+            <section class="py-12 bg-corpLight border-y border-gray-200">
+                <div class="container mx-auto px-6 text-center">
+                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-8">Được tin tưởng bởi hàng trăm doanh nghiệp</p>
+                    <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale">
+                        <i class="fab fa-aws text-4xl"></i>
+                        <i class="fab fa-dhl text-4xl"></i>
+                        <i class="fab fa-fedex text-4xl"></i>
+                        <i class="fab fa-ups text-4xl"></i>
+                        <i class="fab fa-ebay text-4xl"></i>
                     </div>
                 </div>
             </section>
         </div>
 
         <!-- ========================================== -->
-        <!-- 2. TRANG GIỚI THIỆU -->
+        <!-- 2. TRANG GIỚI THIỆU DOANH NGHIỆP -->
         <!-- ========================================== -->
         <div id="gioi-thieu" class="page-content">
-            <div class="hero-bg py-24 md:py-32 text-center text-white relative">
-                <div class="relative z-10">
-                    <h1 class="text-4xl md:text-5xl font-black uppercase tracking-widest text-white mb-4 drop-shadow-2xl">GIỚI THIỆU DOANH NGHIỆP</h1>
-                    <p class="text-xs text-brandDark font-black tracking-widest uppercase bg-brandCyan inline-block px-6 py-2 rounded">Uy tín - An Toàn - Nhanh Chóng</p>
-                </div>
-            </div>
-            <section class="py-16">
-                <div class="container mx-auto px-6 max-w-6xl">
-                    <div class="flex flex-col md:flex-row gap-12 items-center mb-16 glass-card p-8 md:p-12 rounded-2xl">
-                        <div class="md:w-1/2">
-                            <span class="text-brandCyan font-bold uppercase tracking-[0.2em] mb-2 block text-xs">Hồ Sơ Năng Lực</span>
-                            <h2 class="text-3xl font-black text-white mb-6 uppercase tracking-wide">Vận Tải Uy Tín <br><span class="text-brandCyan">Đối Tác Số 1</span></h2>
-                            <p class="text-gray-300 mb-4 leading-relaxed text-justify text-sm">
-                                Được thành lập với nền tảng là một đội ngũ giàu kinh nghiệm trong lĩnh vực Logistics, <strong>Vận Tải Uy Tín</strong> không ngừng mở rộng năng lực và mạng lưới hoạt động trên toàn quốc.
-                            </p>
-                            <p class="text-gray-300 leading-relaxed text-justify text-sm mb-6">
-                                Với tổng kho trung chuyển đặt tại KCN Hòa Cầm (Đà Nẵng), cùng hệ thống xe tải, container hiện đại, chúng tự tin đáp ứng mọi yêu cầu khắt khe nhất về thời gian và độ an toàn của hàng hóa.
-                            </p>
-                            <div class="grid grid-cols-2 gap-6 border-t border-gray-800 pt-6">
-                                <div>
-                                    <div class="text-4xl font-black text-brandCyan mb-1">10+</div>
-                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Năm Kinh Nghiệm</div>
-                                </div>
-                                <div>
-                                    <div class="text-4xl font-black text-brandCyan mb-1">200+</div>
-                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Đầu Xe Các Loại</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="md:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Đoàn xe" class="rounded-lg shadow-[0_0_15px_rgba(0,229,255,0.2)] w-full h-80 object-cover border border-gray-800">
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- 3. TRANG DỊCH VỤ -->
-        <!-- ========================================== -->
-        <div id="dich-vu" class="page-content">
-            <div class="hero-bg py-24 md:py-32 text-center text-white relative">
-                <div class="relative z-10">
-                    <h1 class="text-4xl md:text-5xl font-black uppercase tracking-widest text-white mb-4 drop-shadow-2xl">DỊCH VỤ LOGISTICS</h1>
-                    <p class="text-xs text-brandDark font-black tracking-widest uppercase bg-brandCyan inline-block px-6 py-2 rounded">Đa Phương Thức - Tối Ưu Hóa</p>
-                </div>
-            </div>
-            <section class="py-16">
-                <div class="container mx-auto px-6 max-w-6xl">
-                    <div class="glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row mb-10 border border-gray-800">
-                        <div class="md:w-5/12"><img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover min-h-[250px] opacity-80"></div>
-                        <div class="md:w-7/12 p-10 flex flex-col justify-center">
-                            <h3 class="text-2xl font-black text-brandCyan mb-4 uppercase tracking-widest">1. Vận Tải Đường Bộ</h3>
-                            <p class="text-gray-400 mb-6 text-sm">Dịch vụ cốt lõi và mạnh nhất của chúng tôi. Nhận và giao hàng tận nơi linh hoạt nhất.</p>
-                            <ul class="space-y-3 text-sm text-gray-300 font-medium">
-                                <li><i class="fas fa-caret-right text-brandCyan mr-2"></i> Chành xe ghép hàng lẻ (LTL) tiết kiệm chi phí.</li>
-                                <li><i class="fas fa-caret-right text-brandCyan mr-2"></i> Bao xe tải nguyên chuyến (1.5 tấn - 30 tấn).</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row-reverse mb-10 border border-gray-800">
-                        <div class="md:w-5/12"><img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover min-h-[250px] opacity-80"></div>
-                        <div class="md:w-7/12 p-10 flex flex-col justify-center">
-                            <h3 class="text-2xl font-black text-brandCyan mb-4 uppercase tracking-widest">2. Vận Tải Đường Sắt</h3>
-                            <p class="text-gray-400 mb-6 text-sm">Lựa chọn tối ưu cho đơn hàng khối lượng lớn, không kẹt xe, không ảnh hưởng thời tiết.</p>
-                            <ul class="space-y-3 text-sm text-gray-300 font-medium">
-                                <li><i class="fas fa-caret-right text-brandCyan mr-2"></i> An toàn cao cho hàng vật liệu, máy móc.</li>
-                                <li><i class="fas fa-caret-right text-brandCyan mr-2"></i> Vận chuyển xe máy, ô tô nguyên chiếc.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- 4. TRANG BẢNG GIÁ (PRICING) -->
-        <!-- ========================================== -->
-        <div id="bang-gia" class="page-content">
-            <div class="hero-bg py-24 md:py-32 text-center text-white relative">
-                <div class="relative z-10">
-                    <h1 class="text-4xl md:text-5xl font-black uppercase tracking-widest text-white mb-4 drop-shadow-2xl">BẢNG GIÁ CƯỚC</h1>
-                    <p class="text-xs text-brandDark font-black tracking-widest uppercase bg-brandCyan inline-block px-6 py-2 rounded">Minh Bạch - Cạnh Tranh</p>
+            <div class="page-header-bg py-24 text-center">
+                <div class="container mx-auto px-4">
+                    <h1 class="text-4xl font-black text-white mb-4 uppercase tracking-tight">Hồ Sơ Doanh Nghiệp</h1>
+                    <p class="text-blue-200 text-lg">Uy tín kiến tạo nên những giá trị bền vững.</p>
                 </div>
             </div>
             
-            <section class="py-16 relative">
-                <div class="container mx-auto px-6 relative z-10 text-center">
-                    <p class="text-sm mb-10 text-gray-400 max-w-3xl mx-auto uppercase tracking-widest border border-gray-800 inline-block px-6 py-3 rounded bg-black/40">Áp dụng tuyến đường trục Bắc Nam: <strong>Đà Nẵng - Hà Nội / TP.HCM</strong></p>
-                    
-                    <div class="glass-card rounded-2xl max-w-5xl mx-auto overflow-hidden grid grid-cols-1 md:grid-cols-3 items-stretch border border-gray-800">
-                            <!-- CỘT 1 -->
-                            <div class="p-10 hover:bg-black/30 transition flex flex-col justify-between items-center border-b md:border-b-0 md:border-r border-gray-800">
-                                <div class="w-full text-center">
-                                    <h3 class="font-black text-2xl mb-6 text-white uppercase tracking-widest">Hàng Nặng</h3>
-                                    <div class="font-bold text-brandCyan uppercase tracking-widest text-[10px] mb-2">Chỉ Từ :</div>
-                                    <div class="flex justify-center items-baseline mb-6 text-white drop-shadow-[0_0_10px_rgba(0,229,255,0.4)]">
-                                        <span class="text-5xl font-black">3.000</span>
-                                        <span class="text-sm font-bold ml-2 text-brandCyan">VNĐ/kg</span>
-                                    </div>
-                                    <p class="text-xs text-gray-400 mb-8 border-t border-gray-800 pt-6">Sắt thép, phuy nhớt, phụ tùng, vật liệu xây dựng, máy móc...</p>
-                                </div>
-                                <button onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('bao-gia').scrollIntoView(), 100);" class="w-full btn-skew-outline py-3 text-xs font-bold uppercase tracking-widest"><span>TƯ VẤN NGAY</span></button>
+            <section class="py-20 bg-white">
+                <div class="container mx-auto px-6 max-w-5xl">
+                    <div class="flex flex-col md:flex-row gap-16 items-center mb-16">
+                        <div class="md:w-1/2">
+                            <h2 class="text-3xl font-black text-corpDark mb-6">Vận Tải Uy Tín <br><span class="text-corpBlue text-xl font-semibold uppercase tracking-wide block mt-2">Đối Tác B2B Chiến Lược</span></h2>
+                            <p class="text-gray-600 mb-4 leading-relaxed">
+                                Nền kinh tế phẳng đòi hỏi luồng lưu thông hàng hóa phải liên tục và chính xác. Thấu hiểu điều đó, <strong>Vận Tải Uy Tín</strong> được thành lập với mục tiêu trở thành mắt xích vững chắc nhất trong chuỗi cung ứng của doanh nghiệp bạn.
+                            </p>
+                            <p class="text-gray-600 leading-relaxed mb-8">
+                                Đặt tổng kho trung tâm tại thành phố Đà Nẵng, chúng tôi thiết lập lợi thế chiến lược trong việc luân chuyển hàng hóa hai chiều Bắc - Nam. Quy trình vận hành chuẩn hóa, hệ thống báo giá minh bạch là cách chúng tôi duy trì sự gắn kết dài lâu với đối tác.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-center gap-3 text-sm font-semibold text-corpDark"><i class="fas fa-check text-corpBlue"></i> Hệ thống hóa quy trình giao nhận.</li>
+                                <li class="flex items-center gap-3 text-sm font-semibold text-corpDark"><i class="fas fa-check text-corpBlue"></i> Chi phí vận tải cạnh tranh ổn định.</li>
+                                <li class="flex items-center gap-3 text-sm font-semibold text-corpDark"><i class="fas fa-check text-corpBlue"></i> Đội ngũ chăm sóc khách hàng chuyên trách 1:1.</li>
+                            </ul>
+                        </div>
+                        <div class="md:w-1/2">
+                            <div class="grid grid-cols-2 gap-4">
+                                <img src="https://images.unsplash.com/photo-1565891741441-64926e441838?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="rounded-xl object-cover h-64 w-full shadow-md" alt="Cảng logistics">
+                                <img src="https://images.unsplash.com/photo-1580674684081-7617fbf3d745?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="rounded-xl object-cover h-64 w-full shadow-md mt-8" alt="Kho bãi">
                             </div>
-
-                            <!-- CỘT 2 -->
-                            <div class="p-10 bg-[#041322] relative transform md:scale-105 z-10 flex flex-col justify-between items-center border border-brandCyan shadow-[0_0_20px_rgba(0,229,255,0.15)] rounded-xl">
-                                <div class="absolute top-0 inset-x-0 bg-brandCyan text-brandDark text-[10px] font-black px-4 py-2 text-center uppercase tracking-[0.2em] rounded-t-lg">Gói Phổ Biến</div>
-                                <div class="w-full text-center mt-8">
-                                    <h3 class="font-black text-2xl mb-6 text-white uppercase tracking-widest">Hàng Cồng Kềnh</h3>
-                                    <div class="font-bold text-brandCyan uppercase tracking-widest text-[10px] mb-2">Chỉ Từ :</div>
-                                    <div class="flex justify-center items-baseline mb-6 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">
-                                        <span class="text-6xl font-black">500K</span>
-                                        <span class="text-sm font-bold ml-2 text-brandCyan">/Khối (CBM)</span>
-                                    </div>
-                                    <p class="text-xs text-gray-400 mb-8 border-t border-gray-800 pt-6">Nội thất, xốp, nhựa, thiết bị y tế, hàng tiêu dùng nhẹ...</p>
-                                </div>
-                                <button onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('bao-gia').scrollIntoView(), 100);" class="w-full btn-skew-solid py-4 text-xs font-bold uppercase tracking-widest"><span>ĐẶT LỊCH NGAY</span></button>
-                            </div>
-
-                            <!-- CỘT 3 -->
-                            <div class="p-10 hover:bg-black/30 transition flex flex-col justify-between items-center border-t md:border-t-0 md:border-l border-gray-800">
-                                <div class="w-full text-center">
-                                    <h3 class="font-black text-2xl mb-6 text-white uppercase tracking-widest">Nguyên Chuyến</h3>
-                                    <div class="flex justify-center items-center h-[90px] mb-6">
-                                        <span class="text-3xl font-black tracking-widest text-brandCyan drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">LIÊN HỆ</span>
-                                    </div>
-                                    <p class="text-xs text-gray-400 mb-8 border-t border-gray-800 pt-6">Chuyển nhà xưởng, trọn gói dự án, siêu trường siêu trọng...</p>
-                                </div>
-                                <button onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('bao-gia').scrollIntoView(), 100);" class="w-full btn-skew-outline py-3 text-xs font-bold uppercase tracking-widest"><span>GỬI YÊU CẦU</span></button>
-                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </div>
 
         <!-- ========================================== -->
-        <!-- FORM BÁO GIÁ LIÊN HỆ -->
+        <!-- 3. TRANG DỊCH VỤ (GIẢI PHÁP B2B) -->
         <!-- ========================================== -->
-        <section class="py-20" id="bao-gia">
+        <div id="dich-vu" class="page-content">
+            <div class="page-header-bg py-24 text-center">
+                <div class="container mx-auto px-4">
+                    <h1 class="text-4xl font-black text-white mb-4 uppercase tracking-tight">Giải Pháp Vận Tải</h1>
+                    <p class="text-blue-200 text-lg">Đa phương thức, linh hoạt theo mô hình kinh doanh.</p>
+                </div>
+            </div>
+            
+            <section class="py-20 bg-corpLight">
+                <div class="container mx-auto px-6 max-w-5xl space-y-12">
+                    
+                    <!-- FTL / LTL -->
+                    <div class="corp-card overflow-hidden flex flex-col md:flex-row">
+                        <div class="md:w-2/5 h-64 md:h-auto"><img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover"></div>
+                        <div class="md:w-3/5 p-8 flex flex-col justify-center">
+                            <h3 class="text-2xl font-black text-corpDark mb-2">Vận Tải Đường Bộ (FTL & LTL)</h3>
+                            <p class="text-sm font-semibold text-corpBlue mb-4 uppercase tracking-wider">Giải pháp linh hoạt, Tần suất cao</p>
+                            <p class="text-gray-600 mb-4 text-sm leading-relaxed">Chúng tôi cung cấp giải pháp vận tải nội địa bằng đường bộ với mạng lưới xe tải thùng kín và mui bạt đa dạng.</p>
+                            <ul class="space-y-2 text-sm text-gray-700">
+                                <li><strong>LTL (Gom hàng lẻ):</strong> Tối ưu chi phí cho các lô hàng nhỏ lẻ, lịch trình xuất bến cố định hằng ngày.</li>
+                                <li><strong>FTL (Nguyên chuyến):</strong> Phù hợp cho hàng hóa số lượng lớn, yêu cầu niêm phong, đi nguyên xe không bốc dỡ dọc đường.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Đường sắt -->
+                    <div class="corp-card overflow-hidden flex flex-col md:flex-row-reverse">
+                        <div class="md:w-2/5 h-64 md:h-auto"><img src="https://images.unsplash.com/photo-1474487548417-781cb71495f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover"></div>
+                        <div class="md:w-3/5 p-8 flex flex-col justify-center">
+                            <h3 class="text-2xl font-black text-corpDark mb-2">Vận Tải Đường Sắt Nam Bắc</h3>
+                            <p class="text-sm font-semibold text-corpBlue mb-4 uppercase tracking-wider">Giải pháp chi phí thấp, Ổn định</p>
+                            <p class="text-gray-600 mb-4 text-sm leading-relaxed">Sự lựa chọn hoàn hảo cho việc phân phối hàng hóa khối lượng cực lớn, vật liệu xây dựng, hàng tiêu dùng không yêu cầu khắt khe về thời gian.</p>
+                            <ul class="space-y-2 text-sm text-gray-700">
+                                <li>Nhận hàng tại kho Đà Nẵng, trả hàng tại ga hoặc door-to-door đến kho đối tác.</li>
+                                <li>Đảm bảo an toàn 100%, không rủi ro tai nạn giao thông hay ách tắc đường bộ.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Hàng Dự án -->
+                    <div class="corp-card overflow-hidden flex flex-col md:flex-row">
+                        <div class="md:w-2/5 h-64 md:h-auto"><img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover"></div>
+                        <div class="md:w-3/5 p-8 flex flex-col justify-center">
+                            <h3 class="text-2xl font-black text-corpDark mb-2">Hàng Dự Án & Quản Lý Kho Bãi</h3>
+                            <p class="text-sm font-semibold text-corpBlue mb-4 uppercase tracking-wider">Giải pháp chuyên biệt</p>
+                            <p class="text-gray-600 mb-4 text-sm leading-relaxed">Cung cấp dịch vụ vận tải hàng siêu trường siêu trọng cho các nhà máy công nghiệp và cho thuê dịch vụ lưu trữ hàng hóa.</p>
+                            <ul class="space-y-2 text-sm text-gray-700">
+                                <li>Lập phương án vận tải chi tiết, khảo sát đường đi cho hàng dự án.</li>
+                                <li>Dịch vụ gia cố, đóng kiện gỗ chuẩn xuất khẩu, xe cẩu nâng hạ tận nơi.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 4. TRANG BẢNG GIÁ -->
+        <!-- ========================================== -->
+        <div id="bang-gia" class="page-content">
+            <div class="page-header-bg py-24 text-center">
+                <div class="container mx-auto px-4">
+                    <h1 class="text-4xl font-black text-white mb-4 uppercase tracking-tight">Báo Giá Tham Khảo</h1>
+                    <p class="text-blue-200 text-lg">Cấu trúc biểu phí rõ ràng, cạnh tranh dành cho khách hàng doanh nghiệp.</p>
+                </div>
+            </div>
+            
+            <section class="py-20 bg-white relative">
+                <div class="container mx-auto px-6 max-w-5xl text-center">
+                    <p class="text-sm font-semibold mb-10 text-gray-500 bg-gray-50 inline-block px-4 py-2 rounded-full border border-gray-200">Bảng giá áp dụng cho tuyến đường trục <strong>Đà Nẵng đi các KCN Miền Bắc / Miền Nam</strong></p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        
+                        <!-- Tier 1 -->
+                        <div class="corp-card p-8 text-left border-t-4 border-t-gray-400">
+                            <h3 class="text-lg font-bold text-gray-800 uppercase mb-2">Hàng Nặng / Hàng Kiện</h3>
+                            <p class="text-xs text-gray-500 mb-6 h-8">Cước phí tính theo trọng lượng (Kg/Tấn). Phù hợp hàng công nghiệp sắt thép, máy móc, nguyên liệu.</p>
+                            <div class="mb-6 flex items-baseline gap-1">
+                                <span class="text-3xl font-black text-corpDark">3.000</span>
+                                <span class="text-sm font-bold text-gray-500">VNĐ / KG</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-gray-600 mb-8 border-t border-gray-100 pt-6">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i> Miễn phí nâng hạ tại kho trung tâm.</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i> Chiết khấu cho hợp đồng vận tải dài hạn.</li>
+                            </ul>
+                            <button onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('bao-gia').scrollIntoView(), 100);" class="w-full btn-outline py-2.5 text-sm">Yêu cầu tư vấn</button>
+                        </div>
+
+                        <!-- Tier 2 (Highlight) -->
+                        <div class="corp-card p-10 text-left border-t-4 border-t-corpBlue relative shadow-xl transform md:scale-105 z-10">
+                            <div class="absolute top-0 right-0 bg-corpBlue text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Phổ biến</div>
+                            <h3 class="text-xl font-black text-corpBlue uppercase mb-2">Hàng Nhẹ / Thể Tích</h3>
+                            <p class="text-xs text-gray-500 mb-6 h-8">Cước phí tính theo thể tích khối (CBM). Giải pháp tối ưu cho nội thất, bao bì, nhựa, thiết bị y tế.</p>
+                            <div class="mb-6 flex items-baseline gap-1">
+                                <span class="text-4xl font-black text-corpDark">500.000</span>
+                                <span class="text-sm font-bold text-gray-500">VNĐ / KHỐI</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-gray-700 mb-8 border-t border-gray-100 pt-6 font-medium">
+                                <li><i class="fas fa-check text-corpBlue mr-2"></i> Cam kết 100% đi xe thùng kín, chống nước.</li>
+                                <li><i class="fas fa-check text-corpBlue mr-2"></i> Xếp dỡ chuyên nghiệp, chống móp méo.</li>
+                                <li><i class="fas fa-check text-corpBlue mr-2"></i> Lưu kho chờ ghép chuyến miễn phí.</li>
+                            </ul>
+                            <button onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('bao-gia').scrollIntoView(), 100);" class="w-full btn-primary py-3 text-sm">Nhận báo giá ngay</button>
+                        </div>
+
+                        <!-- Tier 3 -->
+                        <div class="corp-card p-8 text-left border-t-4 border-t-gray-400">
+                            <h3 class="text-lg font-bold text-gray-800 uppercase mb-2">Hàng Dự Án / Bao Xe</h3>
+                            <p class="text-xs text-gray-500 mb-6 h-8">Dành riêng cho doanh nghiệp cần thuê trọn gói, hàng siêu trường siêu trọng, thiết bị dự án lớn.</p>
+                            <div class="mb-6 flex items-center h-[36px]">
+                                <span class="text-xl font-black text-corpDark uppercase border-b-2 border-corpDark">Báo Giá Trực Tiếp</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-gray-600 mb-8 border-t border-gray-100 pt-6">
+                                <li><i class="fas fa-check text-green-500 mr-2"></i> Khảo sát thực tế, lên phương án logistics.</li>
+                                <li><i class="fas fa-check text-green-500 mr-2"></i> Xe cẩu, xe nâng, rơ mooc chuyên dụng.</li>
+                            </ul>
+                            <button onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('bao-gia').scrollIntoView(), 100);" class="w-full btn-outline py-2.5 text-sm">Liên hệ P.Dự án</button>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- FORM LIÊN HỆ ĐẶT HÀNG B2B -->
+        <!-- ========================================== -->
+        <section class="py-20 bg-corpLight" id="bao-gia">
             <div class="container mx-auto px-6">
-                <div class="max-w-5xl mx-auto glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row border border-gray-800">
-                    <div class="md:w-5/12 bg-[#01060a]/80 p-10 text-white flex flex-col justify-center border-r border-gray-800">
-                        <div class="relative z-10">
-                            <h3 class="text-2xl font-black mb-4 uppercase tracking-widest text-brandCyan">Gửi Yêu Cầu <br>Báo Giá</h3>
-                            <p class="mb-8 text-gray-400 text-sm leading-relaxed">Hệ thống sẽ tiếp nhận thông tin và chuyên viên điều vận sẽ gọi lại tư vấn phương án trong vòng 15 phút.</p>
-                            <div class="space-y-4 text-sm font-medium">
-                                <p class="flex items-center"><i class="fas fa-phone-alt text-brandCyan mr-3 text-lg"></i> <span class="text-lg font-bold text-white">0965.390.330</span></p>
-                                <p class="flex items-center"><i class="fas fa-envelope text-brandCyan mr-3 text-lg"></i> tuanhm290@gmail.com</p>
+                <div class="max-w-5xl mx-auto corp-card overflow-hidden flex flex-col md:flex-row">
+                    <div class="md:w-2/5 bg-corpDark p-10 text-white flex flex-col justify-center">
+                        <h3 class="text-2xl font-black mb-4 uppercase">Kế hoạch vận tải của bạn là gì?</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-8">Điền thông tin hàng hóa, đội ngũ kinh doanh B2B của chúng tôi sẽ phân tích và cung cấp bảng cước phí tối ưu nhất cho doanh nghiệp bạn qua email.</p>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0"><i class="fas fa-phone-alt"></i></div>
+                                <div><p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Hotline Điều Hành</p><p class="font-bold text-lg">0965.390.330</p></div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0"><i class="fas fa-envelope"></i></div>
+                                <div><p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Email Tiếp Nhận</p><p class="font-medium text-blue-300">tuanhm290@gmail.com</p></div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="md:w-7/12 p-10 bg-[#041322]/80">
+                    <div class="md:w-3/5 p-10 bg-white">
                         <form action="https://formsubmit.co/tuanhm290@gmail.com" method="POST">
-                            <input type="hidden" name="_subject" value="[WEBSITE] CÓ YÊU CẦU BÁO GIÁ VẬN TẢI MỚI!">
+                            <input type="hidden" name="_subject" value="[B2B] YÊU CẦU BÁO GIÁ DỊCH VỤ LOGISTICS">
                             <input type="hidden" name="_captcha" value="false">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                                <div><label class="block text-gray-500 text-[10px] font-bold mb-2 uppercase tracking-widest">Họ Tên / Công Ty *</label><input name="Ho_Ten" class="w-full p-3 bg-[#010c14] border border-gray-700 text-white rounded focus:border-brandCyan focus:shadow-[0_0_10px_rgba(0,229,255,0.2)] outline-none transition" type="text" required></div>
-                                <div><label class="block text-gray-500 text-[10px] font-bold mb-2 uppercase tracking-widest">Số điện thoại *</label><input name="So_Dien_Thoai" class="w-full p-3 bg-[#010c14] border border-gray-700 text-white rounded focus:border-brandCyan focus:shadow-[0_0_10px_rgba(0,229,255,0.2)] outline-none transition" type="tel" required></div>
+                                <div>
+                                    <label class="block text-gray-700 text-xs font-bold mb-2 uppercase">Công ty / Người liên hệ *</label>
+                                    <input name="Ho_Ten" class="form-input" type="text" placeholder="VD: Công ty TNHH ABC" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 text-xs font-bold mb-2 uppercase">Số điện thoại *</label>
+                                    <input name="So_Dien_Thoai" class="form-input" type="tel" required>
+                                </div>
                             </div>
                             <div class="mb-5">
-                                <label class="block text-gray-500 text-[10px] font-bold mb-2 uppercase tracking-widest">Mô tả hàng hóa</label>
-                                <input name="Chi_Tiet_Hang_Hoa" class="w-full p-3 bg-[#010c14] border border-gray-700 text-white rounded focus:border-brandCyan outline-none transition placeholder-gray-700" type="text" placeholder="Loại hàng, số lượng, kích thước...">
+                                <label class="block text-gray-700 text-xs font-bold mb-2 uppercase">Thông số hàng hóa ước tính</label>
+                                <input name="Chi_Tiet_Hang_Hoa" class="form-input" type="text" placeholder="Loại hàng hóa, khối lượng, kích thước...">
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
                                 <div>
-                                    <label class="block text-gray-500 text-[10px] font-bold mb-2 uppercase tracking-widest">Nơi lấy hàng</label>
-                                    <select name="No_Di" class="w-full p-3 bg-[#010c14] border border-gray-700 text-white rounded focus:border-brandCyan outline-none transition font-semibold">
-                                        <option value="Đà Nẵng">Đà Nẵng</option><option value="Hà Nội">Hà Nội</option><option value="TP.HCM">TP.HCM</option>
+                                    <label class="block text-gray-700 text-xs font-bold mb-2 uppercase">Kho lấy hàng</label>
+                                    <select name="No_Di" class="form-input cursor-pointer font-medium">
+                                        <option value="Đà Nẵng">Kho Đà Nẵng</option><option value="Hà Nội">Khu vực Hà Nội</option><option value="TP.HCM">Khu vực TP.HCM</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-gray-500 text-[10px] font-bold mb-2 uppercase tracking-widest">Nơi giao hàng</label>
-                                    <select name="Noi_Den" class="w-full p-3 bg-[#010c14] border border-gray-700 text-white rounded focus:border-brandCyan outline-none transition font-semibold">
-                                        <option selected value="Hà Nội">Hà Nội</option><option value="TP.HCM">TP.HCM</option><option value="Đà Nẵng">Đà Nẵng</option>
+                                    <label class="block text-gray-700 text-xs font-bold mb-2 uppercase">Nơi giao hàng</label>
+                                    <select name="Noi_Den" class="form-input cursor-pointer font-medium">
+                                        <option selected value="Hà Nội">Khu vực Hà Nội</option><option value="TP.HCM">Khu vực TP.HCM</option><option value="Đà Nẵng">Kho Đà Nẵng</option>
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="w-full btn-skew-solid py-4 text-sm font-black uppercase tracking-widest"><span><i class="fas fa-paper-plane mr-2"></i> GỬI YÊU CẦU</span></button>
+                            <button type="submit" class="w-full btn-primary py-3.5 text-sm uppercase tracking-wide">Gửi Thông Tin Yêu Cầu</button>
                         </form>
                     </div>
                 </div>
@@ -417,88 +455,93 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- 5. QUẢN TRỊ ADMIN (SYSTEM CORE) -->
+        <!-- 5. QUẢN TRỊ ADMIN (B2B SAAS DASHBOARD) -->
         <!-- ========================================== -->
-        <div id="noi-bo" class="page-content min-h-screen pb-20">
-            <div class="border-b border-gray-800 py-16 text-center bg-[#041322]">
-                <h1 class="text-3xl md:text-4xl font-black uppercase tracking-widest text-white"><i class="fas fa-shield-alt mr-3 text-brandCyan"></i>QUẢN TRỊ <span class="text-brandCyan">NỘI BỘ</span></h1>
-                <p class="text-brandCyan mt-2 text-[10px] tracking-[0.3em] uppercase">Logistics Administration System</p>
+        <div id="noi-bo" class="page-content min-h-screen bg-gray-50 pb-20">
+            <div class="bg-white border-b border-gray-200 py-10 px-6 mb-8">
+                <div class="container mx-auto max-w-7xl">
+                    <h1 class="text-2xl font-black uppercase text-corpDark">TMS Workspace</h1>
+                    <p class="text-gray-500 text-sm mt-1">Hệ thống Quản lý Vận tải & Tracking nội bộ.</p>
+                </div>
             </div>
 
             <!-- LOGIN -->
-            <section id="auth-section" class="py-16 flex justify-center">
-                <div class="glass-card p-10 rounded-xl border-t-2 border-brandCyan w-full max-w-sm shadow-xl">
-                    <h2 class="text-xl font-black text-white mb-6 text-center uppercase tracking-widest">BẢO MẬT HỆ THỐNG</h2>
+            <section id="auth-section" class="py-10 flex justify-center">
+                <div class="corp-card p-8 w-full max-w-sm">
+                    <div class="text-center mb-6">
+                        <div class="w-12 h-12 bg-blue-50 text-corpBlue rounded-full flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-lock"></i></div>
+                        <h2 class="text-lg font-bold text-gray-800 uppercase">Đăng Nhập Cổng Nội Bộ</h2>
+                    </div>
                     <form onsubmit="handleLogin(event)">
-                        <div class="mb-4 relative">
-                            <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-brandCyan/50 text-xs"></i>
-                            <input id="login-username" type="text" class="w-full pl-10 pr-4 py-3 bg-[#01060a] border border-gray-700 text-brandCyan rounded focus:border-brandCyan focus:outline-none transition text-xs tracking-widest placeholder-gray-600" placeholder="ADMIN ID" required>
+                        <div class="mb-4">
+                            <label class="block text-gray-600 text-xs font-bold mb-1">Tài khoản</label>
+                            <input id="login-username" type="text" class="form-input" placeholder="Admin ID" required>
                         </div>
-                        <div class="mb-6 relative">
-                            <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-brandCyan/50 text-xs"></i>
-                            <input id="login-password" type="password" class="w-full pl-10 pr-4 py-3 bg-[#01060a] border border-gray-700 text-brandCyan rounded focus:border-brandCyan focus:outline-none transition text-xs tracking-widest placeholder-gray-600" placeholder="PASSWORD" required>
+                        <div class="mb-6">
+                            <label class="block text-gray-600 text-xs font-bold mb-1">Mật khẩu</label>
+                            <input id="login-password" type="password" class="form-input" placeholder="Password" required>
                         </div>
-                        <button id="btn-login" type="submit" class="w-full btn-skew-solid py-3 text-[10px] font-black uppercase tracking-widest"><span>ĐĂNG NHẬP</span></button>
+                        <button id="btn-login" type="submit" class="w-full btn-primary py-3 text-sm">Truy Cập</button>
                     </form>
                 </div>
             </section>
 
             <!-- DASHBOARD ADMIN -->
-            <section id="dashboard-section" class="py-10 hidden">
+            <section id="dashboard-section" class="hidden">
                 <div class="container mx-auto px-4 max-w-7xl">
-                    <div class="flex justify-between items-center glass-card p-4 rounded-lg mb-6 border border-gray-800">
+                    <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-user-circle text-brandCyan text-2xl"></i>
+                            <div class="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-corpBlue text-sm"><i class="fas fa-user-tie"></i></div>
                             <div>
-                                <h2 class="text-xs font-bold text-gray-400 tracking-widest uppercase">ID: <span id="user-display-name" class="text-white font-black"></span></h2>
+                                <h2 class="text-sm font-bold text-gray-800 uppercase">User: <span id="user-display-name" class="text-corpBlue"></span></h2>
                             </div>
                         </div>
-                        <button onclick="handleLogout()" class="border border-red-500/50 text-red-500 hover:bg-red-500/20 px-4 py-1.5 rounded text-[10px] font-bold tracking-widest transition"><i class="fas fa-sign-out-alt"></i> THOÁT</button>
+                        <button onclick="handleLogout()" class="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded transition text-xs font-bold uppercase"><i class="fas fa-sign-out-alt mr-1"></i> Thoát</button>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- FORM TẠO ĐƠN -->
-                        <div class="lg:col-span-4 glass-card p-6 border border-gray-800 rounded-lg">
-                            <h3 class="text-sm font-black text-white mb-4 border-b border-gray-800 pb-2 uppercase tracking-widest"><i class="fas fa-plus-circle text-brandCyan mr-2"></i> TẠO VẬN ĐƠN</h3>
+                        <div class="lg:col-span-1 corp-card p-6">
+                            <h3 class="text-sm font-bold text-gray-800 mb-4 uppercase border-b border-gray-100 pb-2"><i class="fas fa-file-invoice mr-2 text-gray-400"></i> Lập Bill Mới</h3>
                             <form onsubmit="handleCreateOrder(event)" class="space-y-4">
-                                <div class="bg-[#01060a] p-3 rounded border border-gray-800">
-                                    <h4 class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">NGƯỜI GỬI</h4>
-                                    <input id="sender-name" type="text" class="w-full p-1.5 mb-2 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="Họ tên *" required>
-                                    <input id="sender-phone" type="tel" class="w-full p-1.5 mb-2 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="SĐT *" required>
-                                    <input id="sender-addr" type="text" class="w-full p-1.5 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="Địa chỉ *" required>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Thông tin gửi</label>
+                                    <input id="sender-name" type="text" class="form-input py-2 text-sm mb-2" placeholder="Công ty/Người gửi *" required>
+                                    <input id="sender-phone" type="tel" class="form-input py-2 text-sm mb-2" placeholder="SĐT liên hệ *" required>
+                                    <input id="sender-addr" type="text" class="form-input py-2 text-sm" placeholder="Kho lấy hàng *" required>
                                 </div>
-                                <div class="bg-[#01060a] p-3 rounded border border-gray-800">
-                                    <h4 class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">NGƯỜI NHẬN</h4>
-                                    <input id="receiver-name" type="text" class="w-full p-1.5 mb-2 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="Họ tên *" required>
-                                    <input id="receiver-phone" type="tel" class="w-full p-1.5 mb-2 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="SĐT *" required>
-                                    <input id="receiver-addr" type="text" class="w-full p-1.5 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="Địa chỉ *" required>
+                                <div class="pt-2">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Thông tin nhận</label>
+                                    <input id="receiver-name" type="text" class="form-input py-2 text-sm mb-2" placeholder="Công ty/Người nhận *" required>
+                                    <input id="receiver-phone" type="tel" class="form-input py-2 text-sm mb-2" placeholder="SĐT liên hệ *" required>
+                                    <input id="receiver-addr" type="text" class="form-input py-2 text-sm" placeholder="Địa chỉ giao hàng *" required>
                                 </div>
-                                <div class="bg-[#01060a] p-3 rounded border border-gray-800">
-                                    <h4 class="text-[9px] font-bold text-gray-500 uppercase mb-2 tracking-widest">HÀNG HÓA</h4>
-                                    <textarea id="goods-desc" class="w-full p-1.5 mb-2 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none h-10 placeholder-gray-700" placeholder="Mô tả *" required></textarea>
-                                    <input id="goods-weight" type="text" class="w-full p-1.5 bg-transparent border-b border-gray-800 text-white text-xs focus:border-brandCyan outline-none placeholder-gray-700" placeholder="Khối lượng *" required>
+                                <div class="pt-2">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Lô hàng</label>
+                                    <textarea id="goods-desc" class="form-input py-2 text-sm mb-2 h-16" placeholder="Chi tiết vật tư, mã kiện..." required></textarea>
+                                    <input id="goods-weight" type="text" class="form-input py-2 text-sm" placeholder="KL/TT thực tế *" required>
                                 </div>
-                                <button id="btn-create" type="submit" class="w-full btn-skew-solid py-3 text-[10px] tracking-widest mt-2 font-black"><span>TẠO MÃ ĐƠN</span></button>
+                                <button id="btn-create" type="submit" class="w-full btn-primary py-2.5 text-sm mt-2">Tạo Mã Vận Đơn Hệ Thống</button>
                             </form>
                         </div>
 
                         <!-- BẢNG QUẢN LÝ -->
-                        <div class="lg:col-span-8 glass-card p-6 border border-gray-800 rounded-lg">
-                            <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
-                                <h3 class="text-sm font-black text-white uppercase tracking-widest"><i class="fas fa-list text-brandCyan mr-2"></i> DANH SÁCH VẬN ĐƠN</h3>
-                                <button onclick="fetchOrders()" class="text-[9px] bg-brandCyan/10 text-brandCyan border border-brandCyan/30 px-3 py-1.5 rounded hover:bg-brandCyan hover:text-black font-bold transition tracking-widest"><i class="fas fa-sync-alt mr-1"></i> LÀM MỚI</button>
+                        <div class="lg:col-span-2 corp-card p-6">
+                            <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                                <h3 class="text-sm font-bold text-gray-800 uppercase"><i class="fas fa-list-ul mr-2 text-gray-400"></i> Quản Trị Vận Đơn</h3>
+                                <button onclick="fetchOrders()" class="text-xs bg-gray-50 text-gray-600 border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-100 font-bold transition"><i class="fas fa-sync-alt mr-1"></i> Làm mới</button>
                             </div>
-                            <div class="overflow-x-auto bg-[#01060a] border border-gray-800 rounded">
-                                <table class="w-full text-left border-collapse min-w-[800px]">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse min-w-[700px]">
                                     <thead>
-                                        <tr class="bg-[#041322] text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-700">
-                                            <th class="p-3 font-bold">MÃ / NGÀY TẠO</th>
-                                            <th class="p-3 font-bold">TUYẾN ĐƯỜNG</th>
-                                            <th class="p-3 font-bold">THÔNG TIN HÀNG</th>
-                                            <th class="p-3 w-40 font-bold text-center">TRẠNG THÁI</th>
+                                        <tr class="bg-gray-50 text-gray-500 text-[10px] uppercase tracking-wider">
+                                            <th class="p-3 border-b border-gray-200 font-bold rounded-tl">Mã Bill / Ngày</th>
+                                            <th class="p-3 border-b border-gray-200 font-bold">Lộ trình tuyến</th>
+                                            <th class="p-3 border-b border-gray-200 font-bold">Chi tiết lô hàng</th>
+                                            <th class="p-3 w-36 border-b border-gray-200 font-bold text-center rounded-tr">Cập nhật Log</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="order-table-body" class="text-xs text-gray-300">
+                                    <tbody id="order-table-body" class="text-xs text-gray-700">
                                         <!-- Javascript Data -->
                                     </tbody>
                                 </table>
@@ -510,52 +553,57 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-[#01060a] text-gray-500 pt-16 pb-8 border-t border-gray-800 mt-auto relative z-20">
+    <!-- FOOTER DOANH NGHIỆP -->
+    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 mt-auto z-20">
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
                 <div class="md:col-span-1">
-                    <div class="flex items-center gap-2 mb-4"><i class="fas fa-boxes-stacked text-2xl text-brandCyan"></i><span class="text-lg font-black text-white leading-none uppercase tracking-widest">VẬN TẢI <span class="text-brandCyan">UY TÍN</span></span></div>
-                    <p class="leading-relaxed text-xs">Hệ thống Logistics chuyên nghiệp, tối ưu hóa giao nhận toàn quốc.</p>
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fas fa-cubes text-2xl text-corpBlue"></i>
+                        <span class="text-lg font-black text-corpDark leading-none uppercase tracking-tight">VẬN TẢI <span class="text-corpBlue">UY TÍN</span></span>
+                    </div>
+                    <p class="leading-relaxed text-sm text-gray-500">Đối tác cung cấp giải pháp vận tải B2B chuyên nghiệp. An toàn, minh bạch, kết nối chuỗi cung ứng toàn quốc.</p>
                 </div>
                 <div>
-                    <h3 class="text-white text-xs font-black mb-4 uppercase tracking-[0.1em]">Dịch vụ</h3>
-                    <ul class="space-y-2 text-xs">
-                        <li><a href="#dich-vu" class="hover:text-brandCyan transition">> Vận tải đường bộ</a></li>
-                        <li><a href="#dich-vu" class="hover:text-brandCyan transition">> Vận tải đường sắt</a></li>
+                    <h3 class="text-gray-800 text-xs font-bold mb-4 uppercase tracking-widest">Dịch Vụ Vận Tải</h3>
+                    <ul class="space-y-2 text-sm text-gray-500 font-medium">
+                        <li><a href="#dich-vu" class="hover:text-corpBlue transition">Đường bộ nội địa (FTL/LTL)</a></li>
+                        <li><a href="#dich-vu" class="hover:text-corpBlue transition">Đường sắt Bắc Nam</a></li>
+                        <li><a href="#dich-vu" class="hover:text-corpBlue transition">Dự án & Thiết bị siêu trường</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-white text-xs font-black mb-4 uppercase tracking-[0.1em]">Hỗ Trợ</h3>
-                    <ul class="space-y-2 text-xs">
-                        <li><a href="#trang-chu" class="hover:text-brandCyan transition" onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('tracking').scrollIntoView(), 100);">> Tra Cứu Vận Đơn</a></li>
-                        <li><a href="#bang-gia" class="hover:text-brandCyan transition">> Bảng giá cước</a></li>
+                    <h3 class="text-gray-800 text-xs font-bold mb-4 uppercase tracking-widest">Hỗ Trợ Đối Tác</h3>
+                    <ul class="space-y-2 text-sm text-gray-500 font-medium">
+                        <li><a href="#trang-chu" class="hover:text-corpBlue transition" onclick="document.querySelector('a[href=\'#trang-chu\']').click(); setTimeout(() => document.getElementById('tracking').scrollIntoView(), 100);">Hệ thống Tracking</a></li>
+                        <li><a href="#bang-gia" class="hover:text-corpBlue transition">Bảng giá cước quy chuẩn</a></li>
+                        <li><a href="#noi-bo" class="hover:text-corpBlue transition">Portal nội bộ</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-white text-xs font-black mb-4 uppercase tracking-[0.1em]">Mạng Lưới Kho</h3>
-                    <ul class="space-y-2 text-xs">
-                        <li><i class="fas fa-map-marker-alt text-brandCyan w-4"></i> ĐN: KCN Hòa Cầm</li>
-                        <li><i class="fas fa-map-marker-alt text-brandCyan w-4"></i> HN: Thanh Trì</li>
-                        <li><i class="fas fa-phone-alt text-brandCyan w-4"></i> CSKH: 0965.390.330</li>
+                    <h3 class="text-gray-800 text-xs font-bold mb-4 uppercase tracking-widest">Trung Tâm Khai Thác</h3>
+                    <ul class="space-y-2 text-sm text-gray-500 font-medium">
+                        <li><i class="fas fa-map-marker-alt text-corpBlue w-4 text-center"></i> CN Đà Nẵng: KCN Hòa Cầm</li>
+                        <li><i class="fas fa-map-marker-alt text-corpBlue w-4 text-center"></i> CN Hà Nội: Huyện Thanh Trì</li>
+                        <li><i class="fas fa-phone-alt text-corpBlue w-4 text-center"></i> Hotline Điều Hành: 0965.390.330</li>
                     </ul>
                 </div>
             </div>
         </div>
-        <div class="text-center text-[10px] tracking-[0.2em] border-t border-gray-900 pt-6 mt-4 uppercase font-bold text-gray-700">
-            © 2026 LOGISTICS SYSTEM. ALL RIGHTS RESERVED.
+        <div class="text-center text-[10px] tracking-widest border-t border-gray-100 pt-6 mt-4 uppercase font-semibold text-gray-400">
+            © 2026 Vận Tải Uy Tín. Bảo lưu mọi quyền.
         </div>
     </footer>
 
-    <!-- STICKY BUTTON MOBILE (GIỐNG HÌNH YÊU CẦU) -->
-    <div class="fixed bottom-0 w-full md:hidden z-50 flex border-t border-brandCyan/30">
-        <a href="tel:0965.390.330" class="flex-1 bg-[#01060a] text-brandCyan py-4 text-center font-bold text-[11px] flex items-center justify-center gap-2 uppercase tracking-widest border-r border-brandCyan/30"><i class="fas fa-phone-alt"></i> VOICE LINK</a>
-        <a href="https://zalo.me/0965.390.330" class="flex-1 bg-brandCyan text-[#01060a] py-4 text-center font-black text-[11px] flex items-center justify-center gap-2 uppercase tracking-widest"><i class="fas fa-comment-dots"></i> DATA LINK</a>
+    <!-- MOBILE STICKY ACTIONS -->
+    <div class="fixed bottom-0 w-full md:hidden z-50 flex shadow-[0_-4px_10px_rgba(0,0,0,0.05)] bg-white border-t border-gray-100">
+        <a href="tel:0965.390.330" class="flex-1 py-3.5 text-center font-bold text-xs text-gray-700 flex items-center justify-center gap-2 border-r border-gray-100 uppercase tracking-wide"><i class="fas fa-phone-alt text-corpBlue"></i> Gọi Hotline</a>
+        <a href="https://zalo.me/0965.390.330" class="flex-1 py-3.5 text-center font-bold text-xs text-blue-600 flex items-center justify-center gap-2 uppercase tracking-wide"><i class="fas fa-comment-dots text-blue-500"></i> Chat Zalo</a>
     </div>
 
-    <!-- SCRIPTS BẢO MẬT & HỆ THỐNG -->
+    <!-- SCRIPTS CORE -->
     <script>
-        // LỚP BẢO VỆ CHỐNG COPY 
+        // Bảo vệ bản quyền
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85) || (e.ctrlKey && e.keyCode == 83)) return false; };
     </script>
@@ -567,11 +615,13 @@
         // Header Scroll
         const header = document.getElementById('main-header');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) { header.classList.add('bg-[#010c14]/95', 'shadow-[0_4px_20px_rgba(0,0,0,0.8)]'); header.classList.remove('bg-[#010c14]/90'); } 
-            else { header.classList.add('bg-[#010c14]/90'); header.classList.remove('bg-[#010c14]/95', 'shadow-[0_4px_20px_rgba(0,0,0,0.8)]'); }
+            if (window.scrollY > 20) { header.classList.add('shadow-md'); header.classList.remove('shadow-sm'); } 
+            else { header.classList.add('shadow-sm'); header.classList.remove('shadow-md'); }
         });
 
+        // ==========================================
         // ⚠️ THAY LINK GOOGLE SHEETS API CỦA BẠN VÀO ĐÂY ⚠️
+        // ==========================================
         const SCRIPT_URL = "DÁN_LINK_WEB_APP_CỦA_BẠN_VÀO_ĐÂY";
 
         // ROUTER ĐIỀU HƯỚNG SPA
@@ -594,12 +644,12 @@
         window.addEventListener('hashchange', navigate);
         window.addEventListener('DOMContentLoaded', navigate);
 
-        // API HỆ THỐNG GOOGLE SHEETS
+        // API INTEGRATION
         async function callAPI(payload) {
             try {
                 let res = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } });
                 return await res.json();
-            } catch (e) { return { success: false, message: "Lỗi kết nối Server API" }; }
+            } catch (e) { return { success: false, message: "Lỗi Server. Vui lòng kiểm tra lại Link SCRIPT_URL" }; }
         }
 
         function checkAuthState() {
@@ -614,11 +664,11 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            let btn = document.getElementById('btn-login'); btn.innerHTML = '<span>ĐANG KẾT NỐI...</span>';
+            let btn = document.getElementById('btn-login'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Xác thực...';
             let user = document.getElementById('login-username').value; let pass = document.getElementById('login-password').value;
             let res = await callAPI({ action: "login", username: user, password: pass });
-            if(res.success) { sessionStorage.setItem('vt_user', res.user); checkAuthState(); } else { alert("TỪ CHỐI: " + res.message); }
-            btn.innerHTML = '<span>ĐĂNG NHẬP</span>';
+            if(res.success) { sessionStorage.setItem('vt_user', res.user); checkAuthState(); } else { alert("Truy cập từ chối: " + res.message); }
+            btn.innerHTML = 'Truy Cập';
         }
 
         function handleLogout() { sessionStorage.removeItem('vt_user'); checkAuthState(); }
@@ -626,7 +676,7 @@
 
         async function handleCreateOrder(e) {
             e.preventDefault();
-            let btn = document.getElementById('btn-create'); btn.innerHTML = '<span>ĐANG XỬ LÝ...</span>';
+            let btn = document.getElementById('btn-create'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tải...';
             let newOrder = {
                 action: "create", id: generateTrackingNumber(), date: new Date().toLocaleDateString('vi-VN'),
                 senderName: document.getElementById('sender-name').value, senderPhone: document.getElementById('sender-phone').value, senderAddr: document.getElementById('sender-addr').value,
@@ -634,40 +684,40 @@
                 goodsDesc: document.getElementById('goods-desc').value, goodsWeight: document.getElementById('goods-weight').value, status: 'Chờ Nhận Đơn'
             };
             let res = await callAPI(newOrder);
-            if(res.success) { alert("TẠO ĐƠN THÀNH CÔNG!\nMã: " + newOrder.id); e.target.reset(); fetchOrders(); } else { alert("LỖI: " + res.message); }
-            btn.innerHTML = '<span>TẠO MÃ ĐƠN</span>';
+            if(res.success) { alert("LẬP BILL THÀNH CÔNG!\nMã Bill: " + newOrder.id); e.target.reset(); fetchOrders(); } else { alert("Lỗi: " + res.message); }
+            btn.innerHTML = 'Tạo Mã Vận Đơn Hệ Thống';
         }
 
         async function fetchOrders() {
             let tbody = document.getElementById('order-table-body');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-brandCyan font-bold text-[10px] tracking-widest"><i class="fas fa-circle-notch fa-spin mr-2"></i> ĐANG TẢI DỮ LIỆU...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-corpBlue font-bold text-xs"><i class="fas fa-circle-notch fa-spin mr-2"></i> Kết nối cơ sở dữ liệu...</td></tr>';
             let res = await callAPI({ action: "getAll" });
             tbody.innerHTML = '';
             if(res.success && res.data.length > 0) {
                 res.data.forEach(o => {
-                    let sColor = o.status === "Chờ Nhận Đơn" ? "text-gray-400 bg-[#01060a]" : o.status === "Đang Vận Chuyển" ? "text-brandCyan bg-[#01060a]" : o.status === "Đang Giao Hàng" ? "text-purple-400 bg-[#01060a]" : "text-green-400 bg-[#01060a]";
+                    let sColor = o.status === "Chờ Nhận Đơn" ? "bg-gray-100 text-gray-600 border-gray-200" : o.status === "Đang Vận Chuyển" ? "bg-blue-50 text-blue-600 border-blue-200" : o.status === "Đang Giao Hàng" ? "bg-purple-50 text-purple-600 border-purple-200" : "bg-green-50 text-green-600 border-green-200";
                     tbody.innerHTML += `
-                        <tr class="border-b border-gray-800 hover:bg-[#041322] transition">
-                            <td class="p-3"><div class="font-bold text-white">${o.id}</div><div class="text-[9px] text-gray-500">${new Date(o.date).toLocaleDateString('vi-VN')}</div></td>
-                            <td class="p-3 text-[10px]"><div class="text-gray-300 mb-1"><span class="text-gray-600">Từ:</span> ${o.senderAddr.substring(0,15)}</div><div class="text-gray-300"><span class="text-gray-600">Đến:</span> ${o.receiverAddr.substring(0,15)}</div></td>
-                            <td class="p-3 text-[10px] text-gray-400"><div class="text-gray-200 truncate max-w-[120px]">${o.goodsDesc}</div>KL: ${o.goodsWeight}</td>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                            <td class="p-3"><div class="font-bold text-corpDark">${o.id}</div><div class="text-[10px] text-gray-400 mt-1 font-semibold">${new Date(o.date).toLocaleDateString('vi-VN')}</div></td>
+                            <td class="p-3 text-xs"><div class="text-gray-500 mb-1">Gửi: <span class="text-gray-800 font-semibold">${o.senderAddr.substring(0,20)}...</span></div><div class="text-gray-500">Nhận: <span class="text-gray-800 font-semibold">${o.receiverAddr.substring(0,20)}...</span></div></td>
+                            <td class="p-3 text-xs text-gray-500"><div class="text-gray-800 font-semibold mb-1 truncate max-w-[150px]">${o.goodsDesc}</div>Quy cách: ${o.goodsWeight}</td>
                             <td class="p-3 text-center">
-                                <select onchange="updateOrderStatus('${o.id}', this.value, this)" class="${sColor} p-1 text-[9px] font-bold uppercase tracking-widest border border-gray-700 rounded w-full outline-none cursor-pointer">
-                                    <option value="Chờ Nhận Đơn" ${o.status==='Chờ Nhận Đơn'?'selected':''}>CHỜ NHẬN</option>
-                                    <option value="Đang Vận Chuyển" ${o.status==='Đang Vận Chuyển'?'selected':''}>ĐANG CHẠY</option>
-                                    <option value="Đang Giao Hàng" ${o.status==='Đang Giao Hàng'?'selected':''}>ĐANG GIAO</option>
-                                    <option value="Giao Thành Công" ${o.status==='Giao Thành Công'?'selected':''}>ĐÃ GIAO</option>
+                                <select onchange="updateOrderStatus('${o.id}', this.value, this)" class="${sColor} p-1.5 text-[10px] font-bold uppercase tracking-wider border rounded cursor-pointer outline-none w-full">
+                                    <option value="Chờ Nhận Đơn" ${o.status==='Chờ Nhận Đơn'?'selected':''}>Chờ Nhận</option>
+                                    <option value="Đang Vận Chuyển" ${o.status==='Đang Vận Chuyển'?'selected':''}>Đang Chạy</option>
+                                    <option value="Đang Giao Hàng" ${o.status==='Đang Giao Hàng'?'selected':''}>Đang Giao</option>
+                                    <option value="Giao Thành Công" ${o.status==='Giao Thành Công'?'selected':''}>Đã Giao</option>
                                 </select>
                             </td>
                         </tr>`;
                 });
-            } else { tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-600 text-[10px] tracking-widest">KHÔNG CÓ DỮ LIỆU.</td></tr>'; }
+            } else { tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-500 text-xs">Chưa có dữ liệu hệ thống.</td></tr>'; }
         }
 
         async function updateOrderStatus(orderId, newStatus, selectElement) {
             selectElement.disabled = true;
             let res = await callAPI({ action: "update", id: orderId, status: newStatus });
-            if(!res.success) alert("LỖI CẬP NHẬT!");
+            if(!res.success) alert("Lỗi ghi nhận Database!");
             selectElement.disabled = false;
         }
 
@@ -675,19 +725,19 @@
             e.preventDefault();
             let searchId = document.getElementById('tracking-input').value.trim().toUpperCase();
             let msgDiv = document.getElementById('tracking-msg'); let btn = document.getElementById('btn-track');
-            btn.innerHTML = '<span><i class="fas fa-spinner fa-spin"></i> ĐANG TÌM...</span>'; msgDiv.classList.add('hidden');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tải...'; msgDiv.classList.add('hidden');
             let res = await callAPI({ action: "track", id: searchId });
             msgDiv.classList.remove('hidden');
             if(res.success && res.data) {
                 let found = res.data;
-                let txtC = found.status==="Đang Vận Chuyển"?"text-brandCyan":found.status==="Đang Giao Hàng"?"text-purple-400":found.status==="Giao Thành Công"?"text-green-400":"text-gray-400";
-                msgDiv.className = "mt-6 p-6 border border-brandCyan/50 bg-[#01060a] rounded text-left";
-                msgDiv.innerHTML = `<p class="text-[10px] text-gray-500 tracking-[0.2em] mb-2 uppercase">Mã Vận Đơn: <strong class="text-white">${found.id}</strong></p><div class="text-xl font-black mb-4 uppercase tracking-widest text-gray-300">TRẠNG THÁI: <span class="${txtC} drop-shadow-[0_0_5px_currentColor]">${found.status}</span></div><div class="text-[12px] space-y-2 text-gray-400"><p><strong class="text-brandCyan w-10 inline-block">TỪ:</strong> <span class="text-white">${found.senderName}</span> | ${found.senderAddr}</p><p><strong class="text-brandCyan w-10 inline-block">ĐẾN:</strong> <span class="text-white">${found.receiverName}</span> | ${found.receiverAddr}</p><p class="pt-2 mt-2 border-t border-gray-800"><strong class="text-brandCyan w-10 inline-block">HÀNG:</strong> <span class="text-gray-300">${found.goodsDesc}</span> (${found.goodsWeight})</p></div>`;
+                let txtC = found.status==="Đang Vận Chuyển"?"text-blue-600":found.status==="Đang Giao Hàng"?"text-purple-600":found.status==="Giao Thành Công"?"text-green-600":"text-gray-500";
+                msgDiv.className = "mt-6 corp-card p-6 border-l-4 border-corpBlue text-left";
+                msgDiv.innerHTML = `<div class="flex justify-between items-start mb-4"><p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Mã Vận Đơn: <span class="text-corpDark ml-1">${found.id}</span></p><span class="px-3 py-1 rounded text-xs font-black uppercase tracking-wider bg-gray-100 ${txtC}">${found.status}</span></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded border border-gray-100"><div class="border-b md:border-b-0 md:border-r border-gray-200 pb-3 md:pb-0 md:pr-3"><p class="text-xs text-gray-400 uppercase mb-1 font-bold">Thông tin gửi</p><p class="font-bold text-gray-800">${found.senderName}</p><p class="text-gray-500">${found.senderAddr}</p></div><div class="pt-1 md:pt-0 md:pl-3"><p class="text-xs text-gray-400 uppercase mb-1 font-bold">Thông tin nhận</p><p class="font-bold text-gray-800">${found.receiverName}</p><p class="text-gray-500">${found.receiverAddr}</p></div><div class="col-span-1 md:col-span-2 pt-3 border-t border-gray-200 mt-1"><p class="text-xs text-gray-400 uppercase mb-1 font-bold">Chi tiết hàng hóa</p><p class="text-gray-700 font-medium">${found.goodsDesc} <span class="text-gray-400 font-normal">(${found.goodsWeight})</span></p></div></div>`;
             } else {
-                msgDiv.className = "mt-6 p-4 border border-red-500/50 bg-red-900/20 text-red-500 text-center text-xs tracking-widest uppercase rounded";
-                msgDiv.innerHTML = `LỖI: MÃ [${searchId}] KHÔNG TỒN TẠI.`;
+                msgDiv.className = "mt-6 p-4 border border-red-200 bg-red-50 text-red-600 text-center text-xs font-bold uppercase rounded tracking-wide";
+                msgDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> Mã vận đơn không hợp lệ: ${searchId}`;
             }
-            btn.innerHTML = '<span><i class="fas fa-search"></i> TRA CỨU</span>';
+            btn.innerHTML = '<i class="fas fa-search mr-2"></i> Kiểm Tra';
         }
     </script>
 </body>
