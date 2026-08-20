@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Smart Logistics Dashboard - Giám Sát SLA & AI Danh Bạ Toàn Quốc</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    .glass-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    #chatbot-window { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(120%); opacity: 0; pointer-events: none; }
+    #chatbot-window.active { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .pulse-danger { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col antialiased pb-20 md:pb-0 select-none md:select-auto relative">
+
+  <!-- Header Navigation -->
+  <header class="bg-white border-b border-slate-200 shrink-0 z-20 shadow-sm">
+    <div class="px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+          <i class="fa-solid fa-truck-fast text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-slate-900 leading-tight">SLA Monitor <span class="text-blue-600">Enterprise</span></h1>
+            <span class="bg-blue-100 text-blue-800 text-[10px] font-extrabold px-2 py-0.5 rounded border border-blue-200">ĐÀ NẴNG ➜ TOÀN QUỐC</span>
+          </div>
+          <p class="text-xs text-slate-500 hidden sm:block">Theo dõi & Cảnh báo toàn trình tự động theo thời gian thực</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 px-3.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+          <i class="fa-regular fa-clock text-blue-600"></i>
+          <span>Thời gian hệ thống: <span id="liveClock" class="font-bold text-slate-800"></span></span>
+        </div>
+        <button onclick="toggleChatbot()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-1.5 rounded-lg shadow transition flex items-center gap-2">
+          <i class="fa-solid fa-address-book"></i> Tra Cứu Danh Bạ AI
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile View Switcher Tabs (Only on small screens) -->
+  <div class="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex gap-2 sticky top-16 z-20 shadow-xs">
+    <button onclick="switchMobileTab('dashboard')" id="tabBtnDashboard" class="flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition flex items-center justify-center gap-1.5">
+      <i class="fa-solid fa-chart-pie"></i> Dashboard SLA
+    </button>
+    <button onclick="switchMobileTab('upload')" id="tabBtnUpload" class="flex-1 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 transition flex items-center justify-center gap-1.5">
+      <i class="fa-solid fa-cloud-arrow-up"></i> Nạp Dữ Liệu
+    </button>
+  </div>
+
+
+  <!-- Main Container -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- Sidebar: Upload & Rules -->
+    <aside id="sidebarPanel" class="w-full md:w-[360px] lg:w-[380px] bg-white border-r border-slate-200 flex flex-col z-10 shadow-sm relative shrink-0 hidden md:flex">
+      
+      <!-- Upload Card -->
+      <div class="p-4 border-b border-slate-100 bg-slate-50">
+        <h2 class="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-file-arrow-up text-blue-600"></i> Nhập File Vận Đơn (.xlsx)
+        </h2>
+        
+        <label id="dropZone" class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer bg-white hover:bg-blue-50/60 hover:border-blue-400 transition">
+          <i class="fa-solid fa-file-excel text-2xl text-slate-400 mb-1" id="uploadIcon"></i>
+          <p class="text-xs font-semibold text-slate-700 text-center px-2" id="fileNameDisplay">Chọn hoặc Kéo thả file Excel vào đây</p>
+          <p class="text-[10px] text-slate-400 mt-0.5">Báo cáo Nhất Tín, Viettel Post, EMS...</p>
+          <input id="excelInput" type="file" class="hidden" accept=".xlsx, .xls, .csv" />
+        </label>
+
+        <button id="analyzeBtn" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI Đọc & Phân Tích SLA Toàn Trình
+        </button>
+      </div>
+
+      <!-- SLA Leadtime Standards Info -->
+      <div class="p-4 overflow-y-auto custom-scrollbar flex-1 bg-white space-y-3 text-xs text-slate-600">
+        <div class="border-b pb-2 flex items-center justify-between">
+          <h3 class="font-bold text-slate-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved text-indigo-600"></i> Tiêu Chuẩn SLA (Từ Đà Nẵng)
+          </h3>
+          <span class="text-[10px] text-blue-600 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">leadtime.xlsx</span>
+        </div>
+
+        <div class="space-y-2 text-[11px] leading-relaxed">
+          <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
+            <p class="font-bold text-slate-800 mb-0.5"><i class="fa-solid fa-play text-blue-500 mr-1"></i> Mốc Bắt Đầu Tính:</p>
+            <p class="text-slate-600">Bắt đầu từ <b>24h00 của ngày lấy hàng</b> (00:00 của ngày tiếp theo).</p>
+          </div>
+
+          <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
+            <p class="font-bold text-slate-800 mb-0.5"><i class="fa-solid fa-flag-checkered text-red-500 mr-1"></i> Mốc Kết Thúc Đo:</p>
+            <p class="text-slate-600">Đo đến lúc <b>"Đã giao hàng"</b> hoặc <b>"Huỷ"</b>. Các trạng thái khác vẫn đang tính giờ so với <b>hiện tại</b>.</p>
+          </div>
+
+          <div class="p-2 bg-indigo-50/50 rounded-lg border border-indigo-100">
+            <p class="font-bold text-indigo-900 mb-1"><i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i> Khung Cam Kết Chuẩn:</p>
+            <ul class="space-y-1 text-[10px] text-slate-700">
+              <li>• <b>Nội tỉnh (Đà Nẵng):</b> CPN 24h | Tiết kiệm 24h</li>
+              <li>• <b>Nội miền 1 (Huế, QT, QN, Khánh Hòa):</b> CPN 24h | TK 48h</li>
+              <li>• <b>Nội miền 2 (Gia Lai, Đắk Lắk):</b> CPN 36h | TK 72h</li>
+              <li>• <b>Cận miền (Hà Nội, HCM, Bình Dương...):</b> CPN 36h | TK 72h-96h</li>
+              <li>• <b>Liên miền / Tỉnh xa:</b> CPN 48h-60h | TK 120h-144h</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
+          <label class="block text-slate-700 font-bold mb-1 text-[11px]">Ngưỡng Báo Động Sắp Trễ (Giờ trước hạn):</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="warningThreshold" value="12" class="w-20 border border-slate-300 rounded-lg px-2 py-1 outline-none text-xs font-bold text-center focus:border-blue-500 bg-white">
+            <span class="text-[11px] text-slate-500 font-medium">tiếng trước khi quá hạn SLA</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Right Content -->
+    <main id="mainDashboardPanel" class="flex-1 bg-slate-100 flex flex-col h-full overflow-hidden relative">
+      
+      <!-- Overlay before analyzing -->
+      <div id="dashboardOverlay" class="absolute inset-0 bg-slate-100/90 backdrop-blur-sm z-30 flex flex-col items-center justify-center transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md border border-slate-100">
+          <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 mb-2">Hệ Thống Sẵn Sàng Giám Sát</h3>
+          <p class="text-xs text-slate-500 mb-4">Vui lòng tải file Excel danh sách vận đơn ở thanh bên trái và bấm <b>"AI Đọc & Phân Tích SLA Toàn Trình"</b> để xem báo cáo cảnh báo chi tiết.</p>
+        </div>
+      </div>
+
+      <!-- Dashboard Scrollable Area -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+        
+        <!-- 5 KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div class="glass-card p-3.5 relative overflow-hidden group cursor-pointer" onclick="filterBy('ALL')">
+            <p class="text-[10px] font-bold text-slate-500 uppercase">Tổng Vận Đơn</p>
+            <h4 class="text-2xl font-black text-slate-800 mt-1" id="kpiTotal">0</h4>
+            <i class="fa-solid fa-boxes-stacked absolute right-3 top-1/2 -translate-y-1/2 text-3xl text-slate-100 group-hover:scale-110 transition"></i>
+          </div>
+          <div class="glass-card p-3.5 relative overflow-hidden bg-red-50/80 border-red-200 group cursor-pointer hover:border-red-400 transition" onclick="filterBy('OVERDUE')">
+            <p class="text-[10px] font-bold text-red-600 uppercase">🚨 Đang Trễ (Lưu thông)</p>
+            <h4 class="text-2xl font-black text-red-600 mt-1" id="kpiOverdue">0</h4>
+            <i class="fa-solid fa-circle-exclamation absolute right-3 top-1/2 -translate-y-1/2 text-3xl text-red-100 group-hover:scale-110 transition"></i>
+          </div>
+          <div class="glass-card p-3.5 relative overflow-hidden bg-purple-50/80 border-purple-200 group cursor-pointer hover:border-purple-400 transition" onclick="filterBy('DELIVERED_LATE')">
+            <p class="text-[10px] font-bold text-purple-700 uppercase">⏱️ Đã Giao Bị Chậm</p>
+            <h4 class="text-2xl font-black text-purple-700 mt-1" id="kpiDeliveredLate">0</h4>
+            <i class="fa-solid fa-clock-rotate-left absolute right-3 top-1/2 -translate-y-1/2 text-3xl text-purple-100 group-hover:scale-110 transition"></i>
+          </div>
+          <div class="glass-card p-3.5 relative overflow-hidden bg-amber-50/80 border-amber-200 group cursor-pointer hover:border-amber-400 transition" onclick="filterBy('AT_RISK')">
+            <p class="text-[10px] font-bold text-amber-600 uppercase">⚠️ Sắp Trễ Hạn</p>
+            <h4 class="text-2xl font-black text-amber-600 mt-1" id="kpiAtRisk">0</h4>
+            <i class="fa-solid fa-triangle-exclamation absolute right-3 top-1/2 -translate-y-1/2 text-3xl text-amber-100 group-hover:scale-110 transition"></i>
+          </div>
+          <div class="glass-card p-3.5 relative overflow-hidden bg-emerald-50/80 border-emerald-200 group cursor-pointer hover:border-emerald-400 transition" onclick="filterBy('SAFE_AND_OK')">
+            <p class="text-[10px] font-bold text-emerald-600 uppercase">✅ An Toàn / Giao Chuẩn</p>
+            <h4 class="text-2xl font-black text-emerald-600 mt-1" id="kpiSafe">0</h4>
+            <i class="fa-solid fa-shield-check absolute right-3 top-1/2 -translate-y-1/2 text-3xl text-emerald-100 group-hover:scale-110 transition"></i>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="glass-card p-4 flex flex-col">
+            <h3 class="text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-map-location-dot text-red-500"></i> Điểm Nóng Giao Chậm & Nguy Cơ (Theo Tỉnh)
+            </h3>
+            <div class="h-44 relative flex-1"><canvas id="chartProv"></canvas></div>
+          </div>
+          <div class="glass-card p-4 flex flex-col">
+            <h3 class="text-xs font-bold text-slate-700 uppercase mb-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-pie text-blue-500"></i> Phân Bổ Trạng Thái Toàn Trình
+            </h3>
+            <div class="h-44 relative flex-1"><canvas id="chartStatus"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Detail Table Section -->
+        <div class="glass-card overflow-hidden flex flex-col border border-slate-200">
+          <div class="p-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-list-check text-blue-600 mr-1.5"></i>Bảng Đối Soát SLA Chi Tiết</h3>
+              <span id="recordCountBadge" class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded font-semibold">0 đơn</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <input type="text" id="searchTableInput" placeholder="Tìm theo Mã đơn, Người nhận, Tỉnh..." class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-500 w-52 bg-white">
+              <select id="filterSelect" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 outline-none font-semibold text-slate-700 bg-white">
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="OVERDUE">🚨 Chỉ Đang Trễ (Lưu thông)</option>
+                <option value="DELIVERED_LATE">⏱️ Chỉ Đã Giao Chậm</option>
+                <option value="AT_RISK">⚠️ Chỉ Sắp Trễ</option>
+                <option value="SAFE_AND_OK">✅ An toàn / Giao chuẩn</option>
+              </select>
+              <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-excel"></i> Xuất Báo Cáo
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-[440px] custom-scrollbar">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] sticky top-0 z-10 shadow-sm border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3 text-center w-10">STT</th>
+                  <th class="py-2.5 px-3">Mã Vận Đơn</th>
+                  <th class="py-2.5 px-3">Dịch Vụ & Điểm Đến</th>
+                  <th class="py-2.5 px-3 text-center">Trạng Thái Đơn Hàng</th>
+                  <th class="py-2.5 px-3">TG Lấy Hàng ➜ Mốc 0h SLA</th>
+                  <th class="py-2.5 px-3 text-center">Cam Kết SLA</th>
+                  <th class="py-2.5 px-3 w-48">Tiến Độ Toàn Trình</th>
+                  <th class="py-2.5 px-3">Đánh Giá & Cảnh Báo</th>
+                  <th class="py-2.5 px-3 text-center w-16">Liên Hệ</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+            </table>
+          </div>
+        </div>
+        
+      </div>
+    </main>
+  </div>
+
+  <!-- FLOATING CHATBOT WIDGET -->
+  <button id="chatbot-toggle" onclick="toggleChatbot()" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-tr from-indigo-600 to-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:scale-110 transition-transform z-40">
+    <i class="fa-solid fa-headset"></i>
+  </button>
+
+  <div id="chatbot-window" class="fixed bottom-24 right-6 w-[430px] max-h-[620px] bg-white border border-slate-200 shadow-2xl rounded-2xl flex flex-col z-40 overflow-hidden">
+    <!-- Chat Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-blue-600 px-4 py-3 flex items-center justify-between text-white">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-robot text-lg"></i>
+        <div>
+          <h4 class="font-bold text-sm">Trợ lý Danh Bạ & Điều Phối AI</h4>
+          <p class="text-[10px] text-indigo-200">Tra cứu Bưu Cục, Điều Phối & Quản Lý theo Tỉnh (Cột A)</p>
+        </div>
+      </div>
+      <button onclick="toggleChatbot()" class="text-indigo-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    
+    <!-- Chat Messages Container -->
+    <div id="chat-messages" class="flex-1 p-4 bg-slate-50 overflow-y-auto custom-scrollbar flex flex-col gap-3 text-xs">
+      <div class="flex gap-2 w-full">
+        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-600"><i class="fa-solid fa-robot"></i></div>
+        <div class="chat-bubble bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-sm shadow-sm text-slate-700 leading-relaxed">
+          Xin chào! Tôi đã nạp toàn bộ danh bạ từ tất cả các sheet của bạn. <br><br>
+          👉 <b>Hãy nhập tên Tỉnh / Thành phố</b> (Ví dụ: <i>Khánh Hòa, Phú Thọ, Hà Nam, Nam Định, Đà Nẵng, Huế, Hồ Chí Minh, Đồng Nai...</i>) để xem danh sách <b>toàn bộ bưu cục, điều phối, TP vận hành và GĐ chi nhánh</b> tại tỉnh đó!
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <div class="p-3 border-t border-slate-200 bg-white">
+      <form id="chat-form" class="flex gap-2" onsubmit="handleChatSubmit(event)">
+        <input type="text" id="chat-input" placeholder="Nhập tên Tỉnh/Thành phố..." class="flex-1 border border-slate-300 rounded-full px-4 py-2 text-xs outline-none focus:border-indigo-500" autocomplete="off">
+        <button type="submit" class="w-9 h-9 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 shrink-0 shadow">
+          <i class="fa-solid fa-paper-plane text-sm"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Embedded Provinces & Contacts Database from Danh Bạ.xlsx
+    const DB_PROVINCES = [{"tinh": "Tỉnh Hà Nam", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Nguyễn Đại Lâm\n0912059307\nlam.nguyen.dai@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Đồng Văn", "dieu_phoi": "Trần Thị Trung", "sdt_dp": "0948222838", "van_hanh": "Nguyễn Minh Dũng", "sdt_vh": "0335347188"}, {"buu_cuc": "Bưu cục Hà Nam", "dieu_phoi": "Dương Thái Sơn", "sdt_dp": "0353159911", "van_hanh": "Nguyễn Minh Dũng", "sdt_vh": "0335347188"}]}, {"tinh": "Tỉnh Nam Định", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Nguyễn Đại Lâm\n0912059307\nlam.nguyen.dai@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hải Hậu", "dieu_phoi": "Đỗ Thị Kim Oanh", "sdt_dp": "0385355416", "van_hanh": "Phạm Văn Lãm", "sdt_vh": "0357708182"}, {"buu_cuc": "Bưu cục Nam Định", "dieu_phoi": "Hoàng Thị Thùy Dung", "sdt_dp": "0944665523", "van_hanh": "Phạm Văn Lãm", "sdt_vh": "0357708182"}, {"buu_cuc": "Kho hàng Nam Định", "dieu_phoi": "Trần Huy Hoàng", "sdt_dp": "0976017814", "van_hanh": "Phạm Văn Lãm", "sdt_vh": "0357708182"}]}, {"tinh": "Tỉnh Ninh Bình", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Nguyễn Đại Lâm\n0912059307\nlam.nguyen.dai@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu Cục Tam Điệp", "dieu_phoi": "Phạm Thị Hà", "sdt_dp": "0916135279", "van_hanh": "Trần Văn Bình", "sdt_vh": "0979509491"}, {"buu_cuc": "Bưu cục Thanh Bình", "dieu_phoi": "Trần Văn Bình", "sdt_dp": "0979509491", "van_hanh": "Trần Văn Bình", "sdt_vh": "0979509491"}, {"buu_cuc": "Kho hàng Ninh Bình", "dieu_phoi": "Nguyễn Thị Ngọc Mai", "sdt_dp": "0968374920", "van_hanh": "Trần Văn Bình", "sdt_vh": "0979509491"}]}, {"tinh": "Tỉnh Thanh Hóa", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Nguyễn Đại Lâm\n0912059307\nlam.nguyen.dai@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Thanh Hóa", "dieu_phoi": "Nguyễn Thanh Tân", "sdt_dp": "0972551441", "van_hanh": "Lê Sỹ Tất Thắng", "sdt_vh": "0877171166"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "", "sdt_dp": "", "van_hanh": "Lê Sỹ Tất Thắng", "sdt_vh": "0877171166"}, {"buu_cuc": "Điểm nhận trả hàng Thọ Xuân", "dieu_phoi": "Lê Thị Hồng", "sdt_dp": "0911265550", "van_hanh": "Lê Sỹ Tất Thắng", "sdt_vh": "0877171166"}, {"buu_cuc": "Kho hàng Thanh Hóa", "dieu_phoi": "Bùi Quang Lâm", "sdt_dp": "0335195001", "van_hanh": "Lê Sỹ Tất Thắng", "sdt_vh": "0877171166"}]}, {"tinh": "Tỉnh Hà Tĩnh", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Hồ Nhật Linh\n0337182228\nlinh.ho@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hà Tĩnh", "dieu_phoi": "Lê Thị Ái Thơ", "sdt_dp": "0916916937", "van_hanh": "Trần Xuân Phong", "sdt_vh": "0926196777"}]}, {"tinh": "Tỉnh Nghệ An", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Hồ Nhật Linh\n0337182228\nlinh.ho@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hà Huy Tập", "dieu_phoi": "Võ Thị Lương", "sdt_dp": "0983372226", "van_hanh": "Trần Xuân Phong", "sdt_vh": "0926196777"}, {"buu_cuc": "Bưu cục Herbalife Nghệ An", "dieu_phoi": "Phan Thị Ly Sa", "sdt_dp": "0979797811", "van_hanh": "Trần Xuân Phong", "sdt_vh": "0926196777"}, {"buu_cuc": "Kho Nghệ An", "dieu_phoi": "Nguyễn Cảnh Thọ", "sdt_dp": "0976468288", "van_hanh": "Nguyễn Cảnh Thọ", "sdt_vh": "0976468288"}]}, {"tinh": "Tỉnh Hải Dương", "region": "Miền Bắc", "tp_vh": "", "giam_doc": "Trần Tiến Dũng\n\n0913316416\ndung.tran.tien@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hải Dương", "dieu_phoi": "Lưu Quang Việt", "sdt_dp": "0968669911", "van_hanh": "Lưu Quang Việt", "sdt_vh": "0968669911"}, {"buu_cuc": "Kho hàng Hải Dương", "dieu_phoi": "Lưu Quang Việt", "sdt_dp": "0968669911", "van_hanh": "Lưu Quang Việt", "sdt_vh": "0968669911"}]}, {"tinh": "Thành Phố Hải Phòng", "region": "Miền Bắc", "tp_vh": "Phạm Duy Dũng\n\n0982186322\ndung.phamduy@ntlogistics.vn", "giam_doc": "Trần Tiến Dũng\n\n0913316416\ndung.tran.tien@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục An Dương", "dieu_phoi": "Nguyễn Hải Duy", "sdt_dp": "0327103407", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu Cục Dương Kinh", "dieu_phoi": "Nguyễn Văn Tiến", "sdt_dp": "0365894974", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu cục Hải An", "dieu_phoi": "Nguyễn Minh Khuê", "sdt_dp": "0985089065", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu cục Herbalife ( Hải Phòng )", "dieu_phoi": "Nguyễn Minh Khuê", "sdt_dp": "0985089065", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu cục Kiến An", "dieu_phoi": "Nguyễn Thị Mai Hương", "sdt_dp": "0337801076", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu Cục Ngô Quyền", "dieu_phoi": "Phạm Văn Phúc", "sdt_dp": "0398222379", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu cục Thủy Nguyên", "dieu_phoi": "Trịnh Thị Anh", "sdt_dp": "0981185057", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Bưu cục Vĩnh Bảo", "dieu_phoi": "Lê Văn Chung", "sdt_dp": "0866883132", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}, {"buu_cuc": "Kho hàng Hải Phòng", "dieu_phoi": "Nguyễn Minh Khuê", "sdt_dp": "0985089065", "van_hanh": "Nguyễn Minh Khuê", "sdt_vh": "0985089065"}]}, {"tinh": "Tỉnh Hưng Yên", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Tiến Dũng\n\n0913316416\ndung.tran.tien@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hưng yên", "dieu_phoi": "Nguyễn Văn Tú", "sdt_dp": "0363003895", "van_hanh": "Dương Đức Long", "sdt_vh": "0964510084"}, {"buu_cuc": "Bưu cục Khoái Châu", "dieu_phoi": "Hoàng Thị Hạnh", "sdt_dp": "0961896492", "van_hanh": "Dương Đức Long", "sdt_vh": "0964510084"}, {"buu_cuc": "Bưu cục Kim Động", "dieu_phoi": "Phạm Thị Liên", "sdt_dp": "0946872862", "van_hanh": "Dương Đức Long", "sdt_vh": "0964510084"}, {"buu_cuc": "Kho hàng Hưng Yên", "dieu_phoi": "Ngô Văn Bắc", "sdt_dp": "0328801992", "van_hanh": "Dương Đức Long", "sdt_vh": "0964510084"}]}, {"tinh": "Tỉnh Quảng Ninh", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Tiến Dũng\n\n0913316416\ndung.tran.tien@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Quảng Ninh - Cẩm Phả", "dieu_phoi": "Bùi Thị Thúy", "sdt_dp": "0978545392", "van_hanh": "Dương Đức Long", "sdt_vh": "0964510084"}, {"buu_cuc": "Bưu cục Quảng Ninh - Đông Triều", "dieu_phoi": "Nguyễn Minh Luân", "sdt_dp": "0966642668", "van_hanh": "Nguyễn Minh Luân", "sdt_vh": "0966642668"}, {"buu_cuc": "Bưu cục Quảng Ninh - Móng Cái", "dieu_phoi": "Khúc Thị Hồng Quyên", "sdt_dp": "0982008380", "van_hanh": "Nguyễn Minh Luân", "sdt_vh": "0966642668"}, {"buu_cuc": "Bưu Cục Quảng Ninh - Quảng Yên", "dieu_phoi": "Nguyễn Minh Luân", "sdt_dp": "0966642668", "van_hanh": "Nguyễn Minh Luân", "sdt_vh": "0966642668"}, {"buu_cuc": "Bưu cục Quảng Ninh - Uông Bí", "dieu_phoi": "Nguyễn Minh Luân", "sdt_dp": "0966642668", "van_hanh": "Nguyễn Minh Luân", "sdt_vh": "0966642668"}, {"buu_cuc": "Kho Quảng Ninh", "dieu_phoi": "Nguyễn Thị Vân", "sdt_dp": "0979175269", "van_hanh": "Nguyễn Minh Luân", "sdt_vh": "0966642668"}]}, {"tinh": "Tỉnh Thái Bình", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Tiến Dũng\n\n0913316416\ndung.tran.tien@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Đông Hưng", "dieu_phoi": "Nhâm Thị Ánh Nhật", "sdt_dp": "0965538462", "van_hanh": "Nguyễn Đức Đạt", "sdt_vh": "0869588064"}, {"buu_cuc": "Bưu cục Hưng Hà", "dieu_phoi": "Nguyễn Đức Đạt", "sdt_dp": "0869588064", "van_hanh": "Nguyễn Đức Đạt", "sdt_vh": "0869588064"}, {"buu_cuc": "Bưu cục Thái Bình", "dieu_phoi": "Nguyễn Thị Hồng Nhung", "sdt_dp": "0987871125", "van_hanh": "Nguyễn Đức Đạt", "sdt_vh": "0869588064"}, {"buu_cuc": "Bưu cục Tiền Hải", "dieu_phoi": "Nguyễn Đức Đạt", "sdt_dp": "0869588064", "van_hanh": "Nguyễn Đức Đạt", "sdt_vh": "0869588064"}]}, {"tinh": "Tỉnh Bắc Giang", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Bảo Trung\n\n0912771717\ntrung.nguyen.bao@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Bắc Giang", "dieu_phoi": "Tăng Thị Thu", "sdt_dp": "0335262625", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Hiệp Hòa", "dieu_phoi": "Ngô Văn Đức", "sdt_dp": "0973383118", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Lạng Giang", "dieu_phoi": "Hoàng Thị Đào", "sdt_dp": "0984905261", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Lục Nam", "dieu_phoi": "Đoàn Văn Thuật", "sdt_dp": "0979684831", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}]}, {"tinh": "Tỉnh Bắc Ninh", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Bảo Trung\n\n0912771717\ntrung.nguyen.bao@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu Cục Dự Án Bắc Ninh", "dieu_phoi": "Đinh Xuân Quyền", "sdt_dp": "0385207152", "van_hanh": "Đinh Xuân Quyền", "sdt_vh": "0385207152"}, {"buu_cuc": "Bưu cục Quế Võ", "dieu_phoi": "Nguyễn Thị Nhài", "sdt_dp": "0375316335", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Thuận Thành", "dieu_phoi": "Nguyễn Thị Phương Thảo", "sdt_dp": "0979831697", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu Cục Tiên Du", "dieu_phoi": "Đào Văn Ninh", "sdt_dp": "0973774918", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Từ Sơn", "dieu_phoi": "Nguyễn Thị Huyền Trang", "sdt_dp": "0326222794", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Võ Cường", "dieu_phoi": "Nguyễn Thị Phượng", "sdt_dp": "0336937172", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Bưu cục Yên Phong", "dieu_phoi": "Nguyễn Thúy Hường", "sdt_dp": "0397518085", "van_hanh": "Đào Văn Ninh", "sdt_vh": "0973774918"}, {"buu_cuc": "Kho hàng Bắc Ninh", "dieu_phoi": "Trần Đình Quyết", "sdt_dp": "0377978668", "van_hanh": "Trần Đình Quyết", "sdt_vh": "0377978668"}]}, {"tinh": "Tỉnh Lạng Sơn", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Bảo Trung\n\n0912771717\ntrung.nguyen.bao@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Lạng Sơn", "dieu_phoi": "Hứa Thị Hoàng Oanh", "sdt_dp": "0936963589", "van_hanh": "Hứa Thị Hoàng Oanh", "sdt_vh": "0936963589"}]}, {"tinh": "Thành Phố Hà Nội", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Hoàng Minh Khang\n0916982211\nkhang.hoang@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Dự Án Hà Nội", "dieu_phoi": "Trịnh Văn Tuấn", "sdt_dp": "0947200595", "van_hanh": "Nguyễn Phú Thịnh", "sdt_vh": "0918445690"}, {"buu_cuc": "Đội Xe - Hà Nội", "dieu_phoi": "Nguyễn Minh Đức", "sdt_dp": "0943435352", "van_hanh": "Hoàng Minh Khang", "sdt_vh": "0916982211"}, {"buu_cuc": "Kho Nội Đô Hà Nội", "dieu_phoi": "Ngô Văn Hòa", "sdt_dp": "0973935584", "van_hanh": "Hoàng Minh Khang", "sdt_vh": "0916982211"}, {"buu_cuc": "Bưu cục Phản Ứng Nhanh", "dieu_phoi": "Nguyễn Thanh Tùng", "sdt_dp": "0943958338", "van_hanh": "Nguyễn Thanh Tùng", "sdt_vh": "0989443223"}, {"buu_cuc": "Bưu Cục Cầu Giấy", "dieu_phoi": "Nguyễn Đức Duẩn", "sdt_dp": "0945122686", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Tây Sơn", "dieu_phoi": "Nguyễn Quỳnh Trang", "sdt_dp": "0385829589", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu Cục Thanh Xuân", "dieu_phoi": "Ôn Mạnh Hùng", "sdt_dp": "0852880070", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Trung Văn", "dieu_phoi": "Nguyễn Văn Dự", "sdt_dp": "0359832794", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Nam Từ Liêm", "dieu_phoi": "Bùi Anh Tuấn", "sdt_dp": "0962483897", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Sơn Tây", "dieu_phoi": "Nguyễn Thị Trang", "sdt_dp": "0395414431", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Phúc Thọ", "dieu_phoi": "Lê Thu Uyên", "sdt_dp": "0944182969", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Thạch Thất", "dieu_phoi": "Nguyễn Diệu Linh", "sdt_dp": "0977326996", "van_hanh": "Nguyễn Văn Cửu", "sdt_vh": "0942428288"}, {"buu_cuc": "Bưu cục Chương Mỹ", "dieu_phoi": "Tống Quang Thành", "sdt_dp": "0983443102", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục Yên Nghĩa", "dieu_phoi": "Đào Huy Quân", "sdt_dp": "0964328693", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu Cục An Hưng", "dieu_phoi": "Đào Anh Tú", "sdt_dp": "0968754856", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục Vân Đình", "dieu_phoi": "Đinh Thị Thu", "sdt_dp": "0972704594", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục Thanh Oai", "dieu_phoi": "Đỗ Thùy Linh", "sdt_dp": "0374108663", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục Ngọc Hồi", "dieu_phoi": "Trần Thị Thùy", "sdt_dp": "0966224836", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục Hoàng Mai", "dieu_phoi": "Bùi Thanh Tùng", "sdt_dp": "0971171515", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục Thường Tín", "dieu_phoi": "Trần Thanh Long", "sdt_dp": "0966110123", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu cục La Phù", "dieu_phoi": "Đỗ Văn Ngọc", "sdt_dp": "0329884085", "van_hanh": "Nguyễn Anh Quân", "sdt_vh": "0943566363"}, {"buu_cuc": "Bưu Cục Đội Cấn", "dieu_phoi": "Trần Thị Thu", "sdt_dp": "0967878285", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu cục Bắc Từ Liêm", "dieu_phoi": "Trương Công Hoàng Tuấn", "sdt_dp": "0962282166", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu cục Sóc Sơn", "dieu_phoi": "Nguyễn Tiến Bình", "sdt_dp": "0867893163", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu cục Đông Anh", "dieu_phoi": "Bùi Văn Thức", "sdt_dp": "0986701942", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu Cục Long Biên", "dieu_phoi": "Nguyễn Văn Tùng", "sdt_dp": "0974889755", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu Cục Hoàn Kiếm", "dieu_phoi": "Ngô Quốc Anh Tú", "sdt_dp": "0814366778", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu Cục Trần Khát Chân", "dieu_phoi": "Trần Hoàng Anh", "sdt_dp": "0962326733", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}, {"buu_cuc": "Bưu cục Nguyễn Văn Cừ", "dieu_phoi": "Nguyễn Quang Anh", "sdt_dp": "0947294300", "van_hanh": "Nguyễn Thế Ngọc", "sdt_vh": "0916437766"}]}, {"tinh": "Tỉnh Cao Bằng", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Cao Bằng", "dieu_phoi": "Hoàng Quang Thắng", "sdt_dp": "0986012111", "van_hanh": "Hoàng Quang Thắng", "sdt_vh": "0986012111"}]}, {"tinh": "Tỉnh Điện Biên", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Điện Biên", "dieu_phoi": "Quàng Văn Thuận", "sdt_dp": "0966401841", "van_hanh": "Quàng Văn Thuận", "sdt_vh": "0966401841"}]}, {"tinh": "Tỉnh Hà Giang", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hà Giang", "dieu_phoi": "Lê Đức Thành", "sdt_dp": "0963926456", "van_hanh": "Lê Đức Thành", "sdt_vh": "0963926456"}, {"buu_cuc": "Điểm nhận trả hàng Bắc Quang", "dieu_phoi": "Nguyễn Thị Hồng Trang", "sdt_dp": "0349850972", "van_hanh": "Lê Đức Thành", "sdt_vh": "0963926456"}]}, {"tinh": "Tỉnh Lai Châu", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Lai Châu", "dieu_phoi": "La Thị Thanh Huyền", "sdt_dp": "0779383555", "van_hanh": "Lê Đức Thành", "sdt_vh": "0963926456"}]}, {"tinh": "Tỉnh Lào Cai", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Bảo Thắng", "dieu_phoi": "Phạm Đình Đệ", "sdt_dp": "0968109976", "van_hanh": "Phạm Đình Đệ", "sdt_vh": "0968109976"}, {"buu_cuc": "Bưu cục Lào Cai", "dieu_phoi": "Phạm Đình Đệ", "sdt_dp": "0968109976", "van_hanh": "Phạm Đình Đệ", "sdt_vh": "0968109976"}]}, {"tinh": "Tỉnh Sơn La", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Mộc Châu", "dieu_phoi": "Nguyễn Thị Ly", "sdt_dp": "0986666306", "van_hanh": "Nguyễn Ngọc Minh", "sdt_vh": "0961615661"}, {"buu_cuc": "Bưu cục Sơn La", "dieu_phoi": "Nguyễn Ngọc Minh", "sdt_dp": "0961615661", "van_hanh": "Nguyễn Ngọc Minh", "sdt_vh": "0961615661"}]}, {"tinh": "Tỉnh Tuyên Quang", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Tuyên Quang", "dieu_phoi": "Đỗ Thái Cường", "sdt_dp": "0916001484", "van_hanh": "Đỗ Thái Cường", "sdt_vh": "0916001484"}, {"buu_cuc": "Điểm nhận trả hàng Sơn Dương", "dieu_phoi": "Lý Anh Điền", "sdt_dp": "0923501993", "van_hanh": "Đỗ Thái Cường", "sdt_vh": "0916001484"}]}, {"tinh": "Tỉnh Yên Bái", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Trần Minh Hải\n0916979432\nhai.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Yên Bái", "dieu_phoi": "Phạm Khánh Vân", "sdt_dp": "0987143568", "van_hanh": "Phạm Khánh Vân", "sdt_vh": "0987143568"}]}, {"tinh": "Tỉnh Bắc Kạn", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Ngọc Trung\n\n0986862228\ntrung.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Bắc Kạn", "dieu_phoi": "Phạm Bảo Linh", "sdt_dp": "0399002034", "van_hanh": "Phạm Bảo Linh", "sdt_vh": "0399002034"}]}, {"tinh": "Tỉnh Hòa Bình", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Ngọc Trung\n\n0986862228\ntrung.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hòa Bình", "dieu_phoi": "Phạm Văn Tuân", "sdt_dp": "0868388579", "van_hanh": "Phạm Văn Tuân", "sdt_vh": "0868388579"}]}, {"tinh": "Tỉnh Phú Thọ", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Ngọc Trung\n\n0986862228\ntrung.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Cẩm Khê", "dieu_phoi": "Hoàng Tiến Dũng", "sdt_dp": "0971069238", "van_hanh": "Lê Trung Đức", "sdt_vh": "0567993666"}, {"buu_cuc": "Bưu cục Herbalife Phú Thọ", "dieu_phoi": "Lê Trung Đức", "sdt_dp": "0567993666", "van_hanh": "Lê Trung Đức", "sdt_vh": "0567993666"}, {"buu_cuc": "Bưu cục Phú Thọ", "dieu_phoi": "Lê Thị Kiều Anh", "sdt_dp": "0852671999", "van_hanh": "Lê Trung Đức", "sdt_vh": "0567993666"}, {"buu_cuc": "Bưu cục Phú Thọ-Việt Trì", "dieu_phoi": "Nguyễn Anh Tuấn", "sdt_dp": "0869179653", "van_hanh": "Lê Trung Đức", "sdt_vh": "0567993666"}, {"buu_cuc": "Điểm nhận trả hàng Đoan Hùng", "dieu_phoi": "Lê Trung Đức", "sdt_dp": "0567993666", "van_hanh": "Lê Trung Đức", "sdt_vh": "0567993666"}]}, {"tinh": "Tỉnh Thái Nguyên", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Ngọc Trung\n\n0986862228\ntrung.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Phổ Yên", "dieu_phoi": "Vi Thị Xuyến", "sdt_dp": "0965413353", "van_hanh": "Trần Thị Hường", "sdt_vh": "0988693321"}, {"buu_cuc": "Bưu cục Thái Nguyên", "dieu_phoi": "Ngô Minh Thái", "sdt_dp": "0969328807", "van_hanh": "Trần Thị Hường", "sdt_vh": "0988693321"}]}, {"tinh": "Tỉnh Vĩnh Phúc", "region": "Miền Bắc", "tp_vh": "Nguyễn Đình Trưởng\n\n0387303536\ntruong.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Ngọc Trung\n\n0986862228\ntrung.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Lập Thạch", "dieu_phoi": "Nguyễn Tất Toản", "sdt_dp": "0963289992", "van_hanh": "Nguyễn Tất Toản", "sdt_vh": "0963289992"}, {"buu_cuc": "Bưu cục Vĩnh Phúc", "dieu_phoi": "Bùi Thị Hiếu", "sdt_dp": "0919119580", "van_hanh": "Nguyễn Tất Toản", "sdt_vh": "0963289992"}, {"buu_cuc": "Bưu cục Vĩnh Tường", "dieu_phoi": "Nguyễn Thị Hoa", "sdt_dp": "0968948301", "van_hanh": "Nguyễn Tất Toản", "sdt_vh": "0963289992"}, {"buu_cuc": "Kho hàng Vĩnh Phúc", "dieu_phoi": "Nguyễn Tất Toản", "sdt_dp": "0963289992", "van_hanh": "Nguyễn Tất Toản", "sdt_vh": "0963289992"}]}, {"tinh": "Thành Phố Hồ Chí Minh", "region": "Miền Nam / Miền Trung", "tp_vh": "HOÀNG VĂN KIÊN - 0909113282\n kienhv@ntlogistics.vn", "giam_doc": "HOÀNG VĂN THÀNH - 0868550777\n thanh.hoang@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Hub Hòa Hưng", "dieu_phoi": "Vũ Thị Mai Phương", "sdt_dp": "0786228118", "van_hanh": "HOÀNG MINH ĐỨC", "sdt_vh": "0919062511"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Phạm Ngọc Kim Ngân", "sdt_dp": "0769560462", "van_hanh": "HOÀNG MINH ĐỨC", "sdt_vh": "0919062511"}, {"buu_cuc": "HUB Tân Bình", "dieu_phoi": "Phạm Thành Phước", "sdt_dp": "0934637944", "van_hanh": "HOÀNG MINH ĐỨC", "sdt_vh": "0919062511"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Phan Thị Hạnh Dung", "sdt_dp": "0916755155", "van_hanh": "HOÀNG MINH ĐỨC", "sdt_vh": "0919062511"}, {"buu_cuc": "Bưu Cục Quận 7 Phường Phú Thuận", "dieu_phoi": "Bùi Diệp Phi", "sdt_dp": "0948709900", "van_hanh": "NGUYỄN MẠNH LUÂN", "sdt_vh": "0914784322"}, {"buu_cuc": "Bưu Cục Quận 7", "dieu_phoi": "Phạm Thị Ánh Mỹ", "sdt_dp": "0911371313", "van_hanh": "NGUYỄN MẠNH LUÂN", "sdt_vh": "0914784322"}, {"buu_cuc": "Bưu Cục Quận 8", "dieu_phoi": "Nguyễn Ngọc Hà", "sdt_dp": "0911174141", "van_hanh": "NGUYỄN MẠNH LUÂN", "sdt_vh": "0914784322"}, {"buu_cuc": "Bưu Cục Cô Giang", "dieu_phoi": "Lê Nhựt Tấn", "sdt_dp": "0911501616", "van_hanh": "NGUYỄN MẠNH LUÂN", "sdt_vh": "0914784322"}, {"buu_cuc": "Bưu Cục Thủ Đức", "dieu_phoi": "Hoàng Minh Tuấn", "sdt_dp": "0938783275", "van_hanh": "TRƯƠNG QUỲNH THỌ", "sdt_vh": "0938453656"}, {"buu_cuc": "Bưu Cục Quận 2", "dieu_phoi": "Đỗ Minh Trí", "sdt_dp": "0941183344", "van_hanh": "TRƯƠNG QUỲNH THỌ", "sdt_vh": "0938453656"}, {"buu_cuc": "Bưu Cục Gò Vấp", "dieu_phoi": "", "sdt_dp": "0911360303", "van_hanh": "TRƯƠNG QUỲNH THỌ", "sdt_vh": "0938453656"}, {"buu_cuc": "Bưu Cục Quận 9", "dieu_phoi": "Phạm Thị Hiền Hạnh", "sdt_dp": "0911302323", "van_hanh": "TRƯƠNG QUỲNH THỌ", "sdt_vh": "0938453656"}, {"buu_cuc": "Bưu Cục Bình Thạnh", "dieu_phoi": "Dương Trọng Tín", "sdt_dp": "0911303838", "van_hanh": "TRƯƠNG QUỲNH THỌ", "sdt_vh": "0938453656"}, {"buu_cuc": "Bưu Cục Tây Thạnh", "dieu_phoi": "Nguyễn Thanh Lan", "sdt_dp": "0911120110", "van_hanh": "NGUYỄN TẤN LINH", "sdt_vh": "0906395662"}, {"buu_cuc": "Bưu Cục Quận 12", "dieu_phoi": "Nguyễn Thanh Xuân", "sdt_dp": "0911280303", "van_hanh": "NGUYỄN TẤN LINH", "sdt_vh": "0906395662"}, {"buu_cuc": "Bưu Cục Củ Chi", "dieu_phoi": "Đặng Hoài Ân", "sdt_dp": "0911431133", "van_hanh": "NGUYỄN TẤN LINH", "sdt_vh": "0906395662"}, {"buu_cuc": "Bưu Cục Hóc Môn", "dieu_phoi": "Trần Tuấn Anh", "sdt_dp": "0911633344", "van_hanh": "NGUYỄN TẤN LINH", "sdt_vh": "0906395662"}, {"buu_cuc": "Bưu Cục Quận 11", "dieu_phoi": "Phạm Xuân Hoàng", "sdt_dp": "0911145544", "van_hanh": "HUỲNH ĐỨC ANH DUY", "sdt_vh": "0977789130"}, {"buu_cuc": "Bưu Cục Bình Trị Đông", "dieu_phoi": "Nguyễn Hữu Tân", "sdt_dp": "0877909701", "van_hanh": "HUỲNH ĐỨC ANH DUY", "sdt_vh": "0977789130"}, {"buu_cuc": "Bưu Cục Bình Tân", "dieu_phoi": "Khưu Mạnh Long", "sdt_dp": "0902441461", "van_hanh": "HUỲNH ĐỨC ANH DUY", "sdt_vh": "0977789130"}]}, {"tinh": "Tỉnh Bình Dương", "region": "Miền Nam / Miền Trung", "tp_vh": "HOÀNG VĂN KIÊN - 0909113282\n kienhv@ntlogistics.vn", "giam_doc": "HOÀNG VĂN THÀNH - 0868550777\n thanh.hoang@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Tân Uyên", "dieu_phoi": "Hoàng Ngọc Vinh", "sdt_dp": "0976131321", "van_hanh": "NGUYỄN HỮU MẠNH", "sdt_vh": "0983582387"}, {"buu_cuc": "Bưu cục Thủ Dầu Một", "dieu_phoi": "Nguyễn Quốc Toản", "sdt_dp": "0386113192", "van_hanh": "NGUYỄN HỮU MẠNH", "sdt_vh": "0983582387"}, {"buu_cuc": "Bưu cục An Phú", "dieu_phoi": "Nguyễn Đức Thành", "sdt_dp": "0961231315", "van_hanh": "NGUYỄN HỮU MẠNH", "sdt_vh": "0983582387"}, {"buu_cuc": "Bưu cục Bến Cát", "dieu_phoi": "Nguyễn Hữu Tuấn Anh", "sdt_dp": "0362137074", "van_hanh": "NGUYỄN HỮU DŨNG", "sdt_vh": "0983582387"}, {"buu_cuc": "Bưu cục Thuận An", "dieu_phoi": "Lê Văn Chanh", "sdt_dp": "0943358000", "van_hanh": "NGUYỄN VĂN NHÂN", "sdt_vh": "0919696636"}, {"buu_cuc": "Bưu cục Dĩ An", "dieu_phoi": "Đỗ Văn Lâm", "sdt_dp": "0937274882", "van_hanh": "NGUYỄN VĂN NHÂN", "sdt_vh": "0919696636"}]}, {"tinh": "Tỉnh Bà Rịa Vũng Tàu", "region": "Miền Nam / Miền Trung", "tp_vh": "HOÀNG VĂN KIÊN - 0909113282\n kienhv@ntlogistics.vn", "giam_doc": "HOÀNG VĂN THÀNH - 0868550777\n thanh.hoang@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu Cục Vũng Tàu", "dieu_phoi": "Nguyễn Thị Hồng Nhung", "sdt_dp": "0979765892", "van_hanh": "BÙI QUANG THẮNG", "sdt_vh": "0795736349"}, {"buu_cuc": "Bưu cục Bà Rịa", "dieu_phoi": "Chưa có thông tin cập nhật", "sdt_dp": "", "van_hanh": "BÙI QUANG THẮNG", "sdt_vh": "0795736349"}, {"buu_cuc": "Bưu cục Phú Mỹ", "dieu_phoi": "Không có điều độ", "sdt_dp": "", "van_hanh": "BÙI QUANG THẮNG", "sdt_vh": "0795736349"}, {"buu_cuc": "Bưu cục Châu Đức", "dieu_phoi": "Không có điều độ", "sdt_dp": "", "van_hanh": "BÙI QUANG THẮNG", "sdt_vh": "0795736349"}]}, {"tinh": "Tỉnh Tiền Giang", "region": "Miền Nam / Miền Trung", "tp_vh": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho hàng Tiền Giang", "dieu_phoi": "Ngô Đặng Minh Thắng", "sdt_dp": "0774864161", "van_hanh": "NGÔ ĐẶNG MINH THẮNG", "sdt_vh": "0774864161"}, {"buu_cuc": "Bưu cục Gò Công", "dieu_phoi": "Ngô Đặng Minh Thắng", "sdt_dp": "0774864161", "van_hanh": "NGÔ ĐẶNG MINH THẮNG", "sdt_vh": "0774864161"}, {"buu_cuc": "Bưu cục Cai Lậy", "dieu_phoi": "Thái Thị Trúc Phương", "sdt_dp": "0393557209", "van_hanh": "NGÔ ĐẶNG MINH THẮNG", "sdt_vh": "0774864161"}]}, {"tinh": "Tỉnh Đồng Tháp", "region": "Miền Nam / Miền Trung", "tp_vh": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho hàng Đồng Tháp", "dieu_phoi": "Nguyễn Văn Xoài", "sdt_dp": "0903578907", "van_hanh": "VÕ THỊ THIÊN NHI", "sdt_vh": "0931015521"}, {"buu_cuc": "Bưu cục Sa Đéc", "dieu_phoi": "Nguyễn Thị Bạch Mai", "sdt_dp": "0824097098", "van_hanh": "VÕ THỊ THIÊN NHI", "sdt_vh": "0931015521"}, {"buu_cuc": "Bưu cục Hồng Ngự-Tràm Chim- Tân Hồng", "dieu_phoi": "Trần Thị Tường", "sdt_dp": "0977060508", "van_hanh": "VÕ THỊ THIÊN NHI", "sdt_vh": "0931015521"}]}, {"tinh": "Tỉnh Vĩnh Long", "region": "Miền Nam / Miền Trung", "tp_vh": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho hàng Vĩnh Long", "dieu_phoi": "Bùi Thanh Phong/Trương Thị Cẩm My", "sdt_dp": "0906699276/0979278272", "van_hanh": "BÙI THANH PHONG", "sdt_vh": "0906699276"}, {"buu_cuc": "Bưu cục Bình Minh", "dieu_phoi": "Bùi Thanh Phong", "sdt_dp": "0906699276", "van_hanh": "BÙI THANH PHONG", "sdt_vh": "0906699276"}]}, {"tinh": "Tỉnh Trà Vinh", "region": "Miền Nam / Miền Trung", "tp_vh": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Trà Vinh", "dieu_phoi": "Trương Thanh Đô/ Lý Ngọc Hằng", "sdt_dp": "0962319583/0398872829", "van_hanh": "TRƯƠNG THANH ĐÔ", "sdt_vh": "0962319583"}]}, {"tinh": "Tỉnh Bến Tre", "region": "Miền Nam / Miền Trung", "tp_vh": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho hàng Bến Tre", "dieu_phoi": "Lê Thị Mỹ Duyên/ Bùi Thị Tươi", "sdt_dp": "0349435524/0387662152", "van_hanh": "LÊ THỊ MỸ DUYÊN", "sdt_vh": "0349435524"}]}, {"tinh": "Tỉnh Tây Ninh", "region": "Miền Nam / Miền Trung", "tp_vh": "VŨ QUỐC TÂM - 0938391280\ntam.vu@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho hàng Tây Ninh", "dieu_phoi": "Nguyễn Thị Kim Huệ/Lê Đặng Phương Uyên", "sdt_dp": "0797716761/0913774199", "van_hanh": "NGUYỄN THỊ KIM HUỆ", "sdt_vh": "0797716761"}, {"buu_cuc": "Bưu cục Trảng Bàng", "dieu_phoi": "Nguyễn Thị Kim Huệ", "sdt_dp": "0797716761", "van_hanh": "NGUYỄN THỊ KIM HUỆ", "sdt_vh": "0797716761"}]}, {"tinh": "Tỉnh Long An", "region": "Miền Nam / Miền Trung", "tp_vh": "VŨ QUỐC TÂM - 0938391280\ntam.vu@ntlogistics.vn", "giam_doc": "TRẦN VĂN PHƯỚC - 0935930468\nphuoc.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho Long An", "dieu_phoi": "Trần Đức Sinh - Phan Phước Lộc", "sdt_dp": "0798604604/0335269040", "van_hanh": "VŨ QUỐC TÂM", "sdt_vh": "0938391280"}, {"buu_cuc": "Bưu cục Đức Hòa", "dieu_phoi": "Võ Quốc Thái", "sdt_dp": "0909388673", "van_hanh": "VŨ QUỐC TÂM", "sdt_vh": "0938391280"}]}, {"tinh": "Thành Phố Cần Thơ", "region": "Miền Nam / Miền Trung", "tp_vh": "NGUYỄN THÀNH LUÂN\n0902649000\nluan.nguyen@ntlogistics.vn", "giam_doc": "NGUYỄN THÀNH LUÂN\n0902649000\nluan.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Ninh Kiều", "dieu_phoi": "Trần Trúc Ngọc", "sdt_dp": "0986379104", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Trà Nóc", "dieu_phoi": "Hồ Thị Ngọc Quyền", "sdt_dp": "0907642539", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Hưng Phú", "dieu_phoi": "Đỗ Minh Đức", "sdt_dp": "0907880120", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Thốt Nốt", "dieu_phoi": "Võ Thị Mỹ Phúc", "sdt_dp": "0704760953", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Hậu Giang", "dieu_phoi": "Trần Thị Cẩm Hằng", "sdt_dp": "0792077221", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Sóc Trăng", "dieu_phoi": "Lý Quốc Quân", "sdt_dp": "0862096990", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}]}, {"tinh": "Tỉnh Cà Mau", "region": "Miền Nam / Miền Trung", "tp_vh": "NGUYỄN THÀNH LUÂN\n0902649000\nluan.nguyen@ntlogistics.vn", "giam_doc": "NGUYỄN THÀNH LUÂN\n0902649000\nluan.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Cà Mau", "dieu_phoi": "Quách Minh Nhứt", "sdt_dp": "0913140932", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Bạc Liêu", "dieu_phoi": "Trần Thúy Duy/ Thái Văn Phú", "sdt_dp": "0939072880/'0364448846", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}]}, {"tinh": "Tỉnh An Giang", "region": "Miền Nam / Miền Trung", "tp_vh": "NGUYỄN THÀNH LUÂN\n0902649000\nluan.nguyen@ntlogistics.vn", "giam_doc": "NGUYỄN THÀNH LUÂN\n0902649000\nluan.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "An Giang", "dieu_phoi": "Nguyễn Ngọc Hậu", "sdt_dp": "0359157923", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Kiên Giang", "dieu_phoi": "Nguyễn Thị Hương Nguyên", "sdt_dp": "0948187998", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Phú Quốc", "dieu_phoi": "Võ Thị Ngọc Yến", "sdt_dp": "0907688333", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Kiên Lương", "dieu_phoi": "Lương Ngọc Dương", "sdt_dp": "0969313787", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}, {"buu_cuc": "Châu Đốc", "dieu_phoi": "Bùi Phú Luận", "sdt_dp": "0915069302", "van_hanh": "NGUYỄN THÀNH LUÂN", "sdt_vh": "0902649000"}]}, {"tinh": "Tỉnh Đồng Nai", "region": "Miền Nam / Miền Trung", "tp_vh": "ĐẶNG VĂN THÀNH \n0937778895 \nthanh.dang@ntlogistics.vn", "giam_doc": "NGUYỄN VĂN TUẤN \n0935189186\ntuan.nguyen@ntlogistics", "buu_cucs": [{"buu_cuc": "Kho Hàng Đồng Nai", "dieu_phoi": "Đỗ Đức Huy", "sdt_dp": "0378231813", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Châu Ngọc Phương Giao", "sdt_dp": "0962213053", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Mai Thị Thắm", "sdt_dp": "0937277856", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục Long Thành", "dieu_phoi": "Lê Văn Tùng", "sdt_dp": "0968768308/0705836070", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Nguyễn Thị Thu Hiền", "sdt_dp": "0914998925", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục Long Khánh", "dieu_phoi": "Nguyễn Hoàng Trung", "sdt_dp": "0394484645", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Phạm Thị Phương Linh", "sdt_dp": "0356186553", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục Trảng Bom", "dieu_phoi": "Nguyễn Thị Thanh Lan", "sdt_dp": "0855867786", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}, {"buu_cuc": "Bưu cục Tân Phú", "dieu_phoi": "Lương Thị Mỹ Linh", "sdt_dp": "0923815363", "van_hanh": "ĐẶNG VĂN THÀNH", "sdt_vh": "0937778895"}]}, {"tinh": "Tỉnh Bình Phước", "region": "Miền Nam / Miền Trung", "tp_vh": "Nguyễn Ngọc Vinh\n0901553511\nvinh.nguyen.ngoc@ntlogistics.vn", "giam_doc": "NGUYỄN VĂN TUẤN \n0935189186\ntuan.nguyen@ntlogistics", "buu_cucs": [{"buu_cuc": "VP/Kho Bình Phước", "dieu_phoi": "Nguyễn Thanh Tuân", "sdt_dp": "0363978030", "van_hanh": "NGUYỄN NGỌC VINH", "sdt_vh": "0901553511"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Nguyễn Thị Thủy", "sdt_dp": "0966902556", "van_hanh": "NGUYỄN NGỌC VINH", "sdt_vh": "0901553511"}]}, {"tinh": "Tỉnh Thừa Thiên Huế", "region": "Miền Nam / Miền Trung", "tp_vh": "Trần Văn Hướng\n'0399950005\nhuong.tran@ntlogistics.vn", "giam_doc": "Trần Văn Hướng\n'0399950005\nhuong.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "BC Trần Cao Vân", "dieu_phoi": "Phan Thị Thiên Nga", "sdt_dp": "0799627792", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}, {"buu_cuc": "BC Nguyễn Thái Học", "dieu_phoi": "Nguyễn Đình Long Khánh", "sdt_dp": "0769824165/0358137270", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}, {"buu_cuc": "BC An Dương Vương", "dieu_phoi": "Trần Mỹ Uyên Nhi", "sdt_dp": "0934978335", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}, {"buu_cuc": "BC Mai Thúc Loan", "dieu_phoi": "Võ Thị Thanh Tuyền", "sdt_dp": "0399408659", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}, {"buu_cuc": "BC Bùi Thị Xuân", "dieu_phoi": "Hoàng Thị Thanh", "sdt_dp": "0918685126", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}, {"buu_cuc": "Kho Huế", "dieu_phoi": "Lê Đình Trí - Đường Thị Lệ Diễm", "sdt_dp": "0906474675/0366763582", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}]}, {"tinh": "Tỉnh Quảng Trị", "region": "Miền Nam / Miền Trung", "tp_vh": "Trần Văn Hướng\n'0399950005\nhuong.tran@ntlogistics.vn", "giam_doc": "Trần Văn Hướng\n'0399950005\nhuong.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho Quảng Trị", "dieu_phoi": "Trần Thị Hoà", "sdt_dp": "0948023603", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}]}, {"tinh": "Tỉnh Quảng Bình", "region": "Miền Nam / Miền Trung", "tp_vh": "Trần Văn Hướng\n'0399950005\nhuong.tran@ntlogistics.vn", "giam_doc": "Trần Văn Hướng\n'0399950005\nhuong.tran@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho Quảng Bình", "dieu_phoi": "Nguyễn Thị Bích Thuỷ", "sdt_dp": "0941366988/0799095799", "van_hanh": "Trần Văn Hướng", "sdt_vh": "0399950005"}]}, {"tinh": "Thành Phố Đà Nẵng", "region": "Miền Nam / Miền Trung", "tp_vh": "Hồ Hoàng Việt '0905268046", "giam_doc": "Nguyễn Thị Tường Vi \n0934570927\nvi.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu Cục 26 Nguyễn Tri Phương", "dieu_phoi": "Văn Công Minh Tri", "sdt_dp": "0935035019", "van_hanh": "Nguyễn Thị Tường Vi", "sdt_vh": "0934570927"}, {"buu_cuc": "Bưu Cục Ngũ Hành Sơn", "dieu_phoi": "Võ Thị Lệ Thu", "sdt_dp": "0339818274", "van_hanh": "Nguyễn Thị Tường Vi", "sdt_vh": "0934570927"}, {"buu_cuc": "Bưu Cục Hòa Khánh", "dieu_phoi": "Phạm Thị Ánh Hồng", "sdt_dp": "0905788765", "van_hanh": "Nguyễn Thị Tường Vi", "sdt_vh": "0934570927"}, {"buu_cuc": "Kho Đường Bộ Đà Nẵng", "dieu_phoi": "Hồ Hoàng Việt", "sdt_dp": "0905268046", "van_hanh": "Nguyễn Thị Tường Vi", "sdt_vh": "0934570927"}, {"buu_cuc": "Kho FFM Đà Nẵng", "dieu_phoi": "Ngô Trọng Quang", "sdt_dp": "0795467498", "van_hanh": "Nguyễn Thị Tường Vi", "sdt_vh": "0934570927"}]}, {"tinh": "Tỉnh Quảng Nam", "region": "Miền Nam / Miền Trung", "tp_vh": "Nguyễn Thị Tường Vi \n0934570927\nvi.nguyen@ntlogistics.vn", "giam_doc": "Nguyễn Thị Tường Vi \n0934570927\nvi.nguyen@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Hội An", "dieu_phoi": "Lê Mỹ Hồng", "sdt_dp": "0935464259", "van_hanh": "Nguyễn Quang Vui", "sdt_vh": "0364612751"}, {"buu_cuc": "Bưu cục Điện Bàn", "dieu_phoi": "Nguyễn Thị Mai Ly", "sdt_dp": "0794219073", "van_hanh": "Nguyễn Quang Vui", "sdt_vh": "0364612751"}, {"buu_cuc": "Bưu Cục Tam Kỳ", "dieu_phoi": "Nguyễn Thị Thu Thủy", "sdt_dp": "0353008558", "van_hanh": "Nguyễn Quang Vui", "sdt_vh": "0364612751"}, {"buu_cuc": "Bưu Cục Núi Thành", "dieu_phoi": "Phan Thị Điệp Nga", "sdt_dp": "0905703021", "van_hanh": "Nguyễn Quang Vui", "sdt_vh": "0364612751"}]}, {"tinh": "Tỉnh Gia Lai", "region": "Miền Nam / Miền Trung", "tp_vh": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "giam_doc": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Pleiku", "dieu_phoi": "Lê Thị Mỹ Lệ", "sdt_dp": "0962771439", "van_hanh": "Trần Văn Trường", "sdt_vh": "0974608579"}]}, {"tinh": "Tỉnh Bình Định", "region": "Miền Nam / Miền Trung", "tp_vh": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "giam_doc": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho hàng Bình Định", "dieu_phoi": "Phạm Thị Kim Ly", "sdt_dp": "0914222145", "van_hanh": "Trần Minh Hậu", "sdt_vh": "0769889879"}]}, {"tinh": "Tỉnh Kon Tum", "region": "Miền Nam / Miền Trung", "tp_vh": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "giam_doc": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Kon Tum", "dieu_phoi": "Đỗ Thị Bích Thảo", "sdt_dp": "0399033451", "van_hanh": "Phạm Anh Tài", "sdt_vh": "0966147349"}]}, {"tinh": "Tỉnh Quảng Ngãi", "region": "Miền Nam / Miền Trung", "tp_vh": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "giam_doc": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Quảng Ngãi", "dieu_phoi": "Nguyễn Hải Định", "sdt_dp": "0905773113", "van_hanh": "Nguyễn Lê Hoàng Diệu", "sdt_vh": "0914244606"}]}, {"tinh": "Tỉnh Ninh Thuận", "region": "Miền Nam / Miền Trung", "tp_vh": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "BCThanh Sơn", "dieu_phoi": "Nguyễn Thị Ngọc Nữ", "sdt_dp": "0385255571", "van_hanh": "Nguyễn Hoàng Minh Đức", "sdt_vh": "0914244606"}, {"buu_cuc": "Kho Ninh Thuận", "dieu_phoi": "Nguyễn Hoàng Minh Đức", "sdt_dp": "0933311884", "van_hanh": "Nguyễn Hoàng Minh Đức", "sdt_vh": "0914244606"}]}, {"tinh": "Tỉnh Khánh Hòa", "region": "Miền Nam / Miền Trung", "tp_vh": "Phan Văn Thắng\nSĐT: 0979493576\nEmail: thang.phan@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Kho Diên Khánh", "dieu_phoi": "Lý Kim Vũ", "sdt_dp": "0364848492", "van_hanh": "Lý Kim Vũ", "sdt_vh": "0364848492"}, {"buu_cuc": "Kho Nha Trang", "dieu_phoi": "Lê Thị Ngọc Thúy", "sdt_dp": "0989933902", "van_hanh": "Lý Kim Vũ", "sdt_vh": "0364848492"}, {"buu_cuc": "Bưu Cục Ninh Hòa", "dieu_phoi": "Đỗ Thị Yến Ly", "sdt_dp": "0979844283", "van_hanh": "Lý Kim Vũ", "sdt_vh": "0364848492"}, {"buu_cuc": "Bưu Cục Cam Ranh", "dieu_phoi": "Nguyễn Thị Kim Ngân", "sdt_dp": "0927272726", "van_hanh": "Lý Kim Vũ", "sdt_vh": "0364848492"}, {"buu_cuc": "Bưu Cục 63 Trường Sa", "dieu_phoi": "Văn Thị Thanh Hiền", "sdt_dp": "0905301179", "van_hanh": "Lý Kim Vũ", "sdt_vh": "0364848492"}, {"buu_cuc": "Bưu Cục 63 Tôn Thất Tùng", "dieu_phoi": "Trần Minh Kiệt", "sdt_dp": "0788097008", "van_hanh": "Lý Kim Vũ", "sdt_vh": "0364848492"}]}, {"tinh": "Tỉnh Đăk Lăk", "region": "Miền Nam / Miền Trung", "tp_vh": "Lê Quý Hòa\nSĐT: 0909976678\nEmail: hoalq@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục kho Buôn Ma Thuột", "dieu_phoi": "Phạm Thanh Bình", "sdt_dp": "0932472200", "van_hanh": "Lê Việt Dũng", "sdt_vh": "0947072795"}]}, {"tinh": "Tỉnh Phú Yên", "region": "Miền Nam / Miền Trung", "tp_vh": "Nguyễn Anh Tân\n0708193193\ntan.nguyen@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu Cục 20LTP", "dieu_phoi": "Nguyễn Thành Trung", "sdt_dp": "0905653939", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "Kho bộ Phú Yên", "dieu_phoi": "Trần Ngọc Tuấn", "sdt_dp": "0966877775", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "BC Sông Cầu", "dieu_phoi": "Đinh Thị Hồng Vui", "sdt_dp": "0834245599", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}]}, {"tinh": "Tỉnh Lâm Đồng", "region": "Miền Nam / Miền Trung", "tp_vh": "Nguyễn Anh Tân\n0708193193\ntan.nguyen@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "Bưu cục Đà Lạt", "dieu_phoi": "Phan Cao Trí", "sdt_dp": "0707977907", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "Kho Đức Trọng", "dieu_phoi": "Hồ Hữu Hạ", "sdt_dp": "0562278666", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "Bưu cục Di Linh", "dieu_phoi": "Lưu Thanh Tuấn Anh", "sdt_dp": "0398406977", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "Kho Bảo Lộc", "dieu_phoi": "Nguyễn Trung Phong", "sdt_dp": "0915503202", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}]}, {"tinh": "Tỉnh Bình Thuận", "region": "Miền Nam / Miền Trung", "tp_vh": "Nguyễn Anh Tân\n0708193193\ntan.nguyen@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "VP/Kho Phan Thiết", "dieu_phoi": "Trần Văn Nghĩa", "sdt_dp": "0354225191", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Tôn Thất Lập", "sdt_dp": "0942226885", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}]}, {"tinh": "Tỉnh Đak Nông", "region": "Miền Nam / Miền Trung", "tp_vh": "Nguyễn Anh Tân\n0708193193\ntan.nguyen@ntlogistics.vn", "giam_doc": "Kiều Anh Hùng\nSĐT : 0778 63 6688\nMail: hung.kieu@ntlogistics.vn", "buu_cucs": [{"buu_cuc": "VP/Kho Gia Nghĩa", "dieu_phoi": "Trần Mạnh Hùng", "sdt_dp": "0946500060", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}, {"buu_cuc": "Bưu cục trung tâm", "dieu_phoi": "Đào Nguyễn Trường Phước", "sdt_dp": "0973924848", "van_hanh": "Nguyễn Thành Trung", "sdt_vh": "905653939"}]}];
+
+    // Real-time live clock
+    function updateClock() {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('liveClock').innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} - ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // State Variables
+    let parsedData = [];
+    let analyzedData = [];
+    let charts = {};
+    const fileInput = document.getElementById('excelInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    // MAPPING LEADTIME (TỪ ĐÀ NẴNG) DỰA THEO leadtime.xlsx
+    const MAPPING_LT = {
+      'đà nẵng': { region: 'NoiTinh', cpn: 24, tk: 24 },
+      'huế': { region: 'NoiMien', cpn: 24, tk: 48 },
+      'quảng trị': { region: 'NoiMien', cpn: 24, tk: 48 },
+      'quảng ngãi': { region: 'NoiMien', cpn: 24, tk: 48 },
+      'khánh hòa': { region: 'NoiMien', cpn: 24, tk: 48 },
+      'bình định': { region: 'NoiMien', cpn: 24, tk: 48 },
+      'phú yên': { region: 'NoiMien', cpn: 24, tk: 48 },
+      'gia lai': { region: 'NoiMien2', cpn: 36, tk: 72 },
+      'đắk lắk': { region: 'NoiMien2', cpn: 36, tk: 72 },
+      'hà nội': { region: 'CanMien', cpn: 36, tk: 72 },
+      'hải phòng': { region: 'CanMien', cpn: 36, tk: 72 },
+      'bắc ninh': { region: 'CanMien', cpn: 36, tk: 72 },
+      'nghệ an': { region: 'CanMien', cpn: 36, tk: 72 },
+      'thanh hoá': { region: 'CanMien', cpn: 36, tk: 72 },
+      'hà tĩnh': { region: 'CanMien', cpn: 36, tk: 72 },
+      'hồ chí minh': { region: 'CanMien', cpn: 36, tk: 72 },
+      'tp. hcm': { region: 'CanMien', cpn: 36, tk: 72 },
+      'đồng nai': { region: 'CanMien', cpn: 36, tk: 72 },
+      'bình dương': { region: 'CanMien', cpn: 36, tk: 72 },
+      'cần thơ': { region: 'CanMien', cpn: 36, tk: 72 },
+      'default': { region: 'LienMien', cpn: 48, tk: 120 }
+    };
+
+    function getLeadtimeConfig(province) {
+      const p = (province || '').toLowerCase();
+      for (const [key, val] of Object.entries(MAPPING_LT)) {
+        if (p.includes(key)) return val;
+      }
+      return MAPPING_LT['default'];
+    }
+
+    // Handle Upload File
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        document.getElementById('fileNameDisplay').innerText = file.name;
+        document.getElementById('fileNameDisplay').classList.add('text-blue-600');
+        document.getElementById('uploadIcon').className = 'fa-solid fa-file-excel text-2xl text-emerald-500 mb-1';
+        analyzeBtn.disabled = false;
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            let targetSheet = workbook.SheetNames.includes('BILL') ? 'BILL' : workbook.SheetNames[0];
+            const jsonRaw = XLSX.utils.sheet_to_json(workbook.Sheets[targetSheet], { header: 1, defval: '' });
+
+            let headerRowIdx = 0;
+            for (let i = 0; i < Math.min(20, jsonRaw.length); i++) {
+              if (jsonRaw[i].join(' ').toUpperCase().includes('MÃ VẬN ĐƠN')) { headerRowIdx = i; break; };
+            }
+            
+            const headers = jsonRaw[headerRowIdx].map(h => String(h).trim());
+            parsedData = [];
+            for (let r = headerRowIdx + 1; r < jsonRaw.length; r++) {
+              const rowVals = jsonRaw[r];
+              if (!rowVals || rowVals.length === 0) continue;
+              let obj = {};
+              headers.forEach((head, c) => { if (head) obj[head] = rowVals[c] !== undefined ? String(rowVals[c]).trim() : ''; });
+              if (obj['MÃ VẬN ĐƠN'] && obj['MÃ VẬN ĐƠN'].length > 3) parsedData.push(obj);
+            }
+          } catch(err) {
+            alert('Lỗi đọc file: ' + err.message);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    });
+
+    // Date Parser
+    function parseDate(str) {
+      if (!str) return null;
+      let m = str.match(/^(\d{1,2}):(\d{2})\s+(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+      if (m) return new Date(m[5], m[4]-1, m[3], m[1], m[2]);
+      m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})\s+(\d{1,2}):(\d{2})$/);
+      if (m) return new Date(m[3], m[2]-1, m[1], m[4], m[5]);
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDate(d) {
+      if (!d) return '';
+      const pad = n => String(n).padStart(2,'0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    }
+
+    // Core Calculation Engine
+    analyzeBtn.addEventListener('click', () => {
+      if (parsedData.length === 0) return alert('Dữ liệu chưa tải xong hoặc file trống.');
+      
+      const currentTime = new Date();
+      const warnOffset = Number(document.getElementById('warningThreshold').value) || 12;
+
+      analyzedData = parsedData.map(order => {
+        const srv = (order['DỊCH VỤ'] || '').toUpperCase();
+        const status = (order['TRẠNG THÁI'] || '').trim();
+        const isExpress = /CPN|NHANH|MES/.test(srv);
+        const config = getLeadtimeConfig(order['TỈNH NHẬN']);
+        
+        const pickupDate = parseDate(order['NGÀY LẤY HÀNG']);
+        const deliveryDate = parseDate(order['NGÀY GIAO']);
+        
+        let maxH = isExpress ? config.cpn : config.tk;
+        let slaStart = null;
+        let elapsedH = 0;
+        let diffH = 0;
+        let category = 'SAFE';
+
+        if (status.includes('huỷ') || status.includes('Không phát')) {
+          category = 'CANCEL';
+        } else if (pickupDate) {
+          // Quy tắc: Tính từ 24h00 của ngày lấy hàng thành công (00:00 ngày tiếp theo)
+          slaStart = new Date(pickupDate);
+          slaStart.setHours(24, 0, 0, 0); 
+          
+          if (status === 'Đã giao hàng') {
+            // Đã giao -> Đo đến thời điểm giao thực tế
+            if (deliveryDate) {
+              elapsedH = (deliveryDate - slaStart) / 3600000;
+              if (elapsedH < 0) elapsedH = 0; 
+              diffH = elapsedH - maxH;
+              if (elapsedH > maxH) {
+                category = 'DELIVERED_LATE'; // Đã giao hàng nhưng bị chậm
+              } else {
+                category = 'DELIVERED_OK';   // Đã giao đúng hạn
+              }
+            } else {
+              category = 'DELIVERED_OK';
+            }
+          } else {
+            // Các trạng thái khác -> Vẫn đang còn hành trình -> Đo đến thời gian hiện tại
+            elapsedH = (currentTime - slaStart) / 3600000;
+            if (elapsedH < 0) {
+              elapsedH = 0; 
+              category = 'SAFE';
+            } else {
+              diffH = elapsedH - maxH;
+              if (elapsedH > maxH) category = 'OVERDUE';
+              else if (elapsedH >= (maxH - warnOffset)) category = 'AT_RISK';
+            }
+          }
+        }
+
+        return { 
+          ...order, 
+          slaStart, 
+          maxH, 
+          elapsedH: Math.round(elapsedH*10)/10, 
+          diffH: Math.round(diffH*10)/10, 
+          category,
+          statusBadge: getStatusBadge(status)
+        };
+      });
+
+      // Sắp xếp ưu tiên: Đang trễ ➜ Giao chậm ➜ Sắp trễ ➜ An toàn
+      analyzedData.sort((a,b) => {
+        const priority = { 'OVERDUE': 4, 'DELIVERED_LATE': 3, 'AT_RISK': 2, 'SAFE': 1, 'DELIVERED_OK': 0, 'CANCEL': -1 };
+        if (priority[b.category] !== priority[a.category]) return priority[b.category] - priority[a.category];
+        return b.diffH - a.diffH;
+      });
+      
+      document.getElementById('dashboardOverlay').classList.add('opacity-0', 'pointer-events-none');
+      renderDashboard();
+    });
+
+    function getStatusBadge(status) {
+      if (status === 'Đã giao hàng') return '<span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-200 flex items-center gap-1 justify-center"><i class="fa-solid fa-circle-check text-emerald-600"></i> Đã giao</span>';
+      if (status === 'Đang vận chuyển') return '<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-blue-200 flex items-center gap-1 justify-center"><i class="fa-solid fa-truck-fast text-blue-600"></i> Vận chuyển</span>';
+      if (status === 'Đang giao hàng') return '<span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-amber-200 flex items-center gap-1 justify-center"><i class="fa-solid fa-box text-amber-600"></i> Đi giao</span>';
+      if (status === 'Đã huỷ' || status === 'Không phát được') return '<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-slate-300 justify-center flex">'+status+'</span>';
+      return `<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-slate-200 justify-center flex">${status || 'Chưa rõ'}</span>`;
+    }
+
+    function filterBy(status) {
+      document.getElementById('filterSelect').value = status;
+      renderTable();
+    }
+
+    document.getElementById('filterSelect').addEventListener('change', renderTable);
+    document.getElementById('searchTableInput').addEventListener('input', renderTable);
+
+    function renderDashboard() {
+      const overdue = analyzedData.filter(o => o.category === 'OVERDUE');
+      const atRisk = analyzedData.filter(o => o.category === 'AT_RISK');
+      const deliveredLate = analyzedData.filter(o => o.category === 'DELIVERED_LATE');
+      const safeOk = analyzedData.filter(o => o.category === 'SAFE' || o.category === 'DELIVERED_OK');
+      
+      document.getElementById('kpiTotal').innerText = analyzedData.length;
+      document.getElementById('kpiOverdue').innerText = overdue.length;
+      document.getElementById('kpiAtRisk').innerText = atRisk.length;
+      document.getElementById('kpiDeliveredLate').innerText = deliveredLate.length;
+      document.getElementById('kpiSafe').innerText = safeOk.length;
+      
+      renderTable();
+
+      // Chart 1: Rủi ro theo tỉnh (Bar)
+      const provData = {};
+      overdue.concat(deliveredLate).concat(atRisk).forEach(o => { 
+        const p = o['TỈNH NHẬN'] || 'Chưa rõ';
+        provData[p] = (provData[p] || 0) + 1; 
+      });
+      
+      if (charts.prov) charts.prov.destroy();
+      charts.prov = new Chart(document.getElementById('chartProv').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(provData).length ? Object.keys(provData) : ['Không có'],
+          datasets: [{ label: 'Đơn vi phạm / Nguy cơ', data: Object.values(provData).length ? Object.values(provData) : [0], backgroundColor: '#ef4444', borderRadius: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      // Chart 2: Tỷ trọng trạng thái (Doughnut)
+      if (charts.status) charts.status.destroy();
+      charts.status = new Chart(document.getElementById('chartStatus').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Đang Trễ', 'Giao Chậm', 'Sắp Trễ', 'An Toàn / Đạt', 'Huỷ'],
+          datasets: [{
+            data: [overdue.length, deliveredLate.length, atRisk.length, safeOk.length, analyzedData.filter(o=>o.category==='CANCEL').length],
+            backgroundColor: ['#ef4444', '#a855f7', '#f59e0b', '#10b981', '#94a3b8']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }, cutout: '65%' }
+      });
+    }
+
+    function renderTable() {
+      const val = document.getElementById('filterSelect').value;
+      const search = document.getElementById('searchTableInput').value.toLowerCase().trim();
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      const filtered = analyzedData.filter(o => {
+        // Status filter
+        let matchStatus = true;
+        if (val === 'SAFE_AND_OK') matchStatus = (o.category === 'SAFE' || o.category === 'DELIVERED_OK');
+        else if (val !== 'ALL') matchStatus = (o.category === val);
+        if (!matchStatus) return false;
+
+        // Search text
+        if (search) {
+          const matchCode = (o['MÃ VẬN ĐƠN'] || '').toLowerCase().includes(search);
+          const matchReceiver = (o['NGƯỜI NHẬN'] || '').toLowerCase().includes(search);
+          const matchProv = (o['TỈNH NHẬN'] || '').toLowerCase().includes(search);
+          if (!matchCode && !matchReceiver && !matchProv) return false;
+        }
+
+        return true;
+      });
+
+      document.getElementById('recordCountBadge').innerText = `${filtered.length} đơn`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-400 font-medium">Không có vận đơn nào phù hợp với bộ lọc</td></tr>';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach((o, idx) => { 
+        let badge = '', progress = '';
+        const pct = Math.min(100, Math.max(0, (o.elapsedH / o.maxH) * 100));
+        let diffDays = (o.diffH / 24).toFixed(1); 
+
+        if (o.category === 'OVERDUE') {
+          badge = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold text-[10px] block w-max"><i class="fa-solid fa-triangle-exclamation"></i> ĐANG TRỄ HẠN</span>
+                   <span class="text-[10px] text-red-600 font-semibold block mt-0.5">+ Chậm ${diffDays} ngày (${o.diffH}h)</span>`;
+          progress = `<div class="w-full bg-slate-200 h-1.5 mt-1 rounded-full overflow-hidden"><div class="bg-red-500 h-1.5 rounded-full" style="width: 100%"></div></div>`;
+        } else if (o.category === 'DELIVERED_LATE') {
+          badge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold text-[10px] block w-max"><i class="fa-solid fa-clock-rotate-left"></i> ĐÃ GIAO CHẬM</span>
+                   <span class="text-[10px] text-purple-600 font-semibold block mt-0.5">+ Chậm ${diffDays} ngày (${o.diffH}h)</span>`;
+          progress = `<div class="w-full bg-slate-200 h-1.5 mt-1 rounded-full overflow-hidden"><div class="bg-purple-500 h-1.5 rounded-full" style="width: 100%"></div></div>`;
+        } else if (o.category === 'AT_RISK') {
+          badge = `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px] block w-max"><i class="fa-solid fa-clock"></i> SẮP TRỄ HẠN</span>`;
+          progress = `<div class="w-full bg-slate-200 h-1.5 mt-1 rounded-full overflow-hidden"><div class="bg-amber-500 h-1.5 rounded-full" style="width: ${pct}%"></div></div>`;
+        } else if (o.category === 'SAFE' || o.category === 'DELIVERED_OK') {
+          badge = `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px] block w-max"><i class="fa-solid fa-check"></i> ĐẠT CHUẨN</span>`;
+          progress = `<div class="w-full bg-slate-200 h-1.5 mt-1 rounded-full overflow-hidden"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: ${pct}%"></div></div>`;
+        } else {
+          badge = `<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold text-[10px] block w-max">LỖI/HUỶ</span>`;
+        }
+
+        html += `
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100 text-[11px]">
+            <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${idx + 1}</td>
+            <td class="py-2.5 px-3 font-bold text-slate-900 font-mono">${o['MÃ VẬN ĐƠN']}</td>
+            <td class="py-2.5 px-3">
+              <span class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold text-[10px]">${o['DỊCH VỤ'] || '-'}</span>
+              <div class="text-slate-700 font-medium mt-0.5">${o['QUẬN/HUYỆN NHẬN'] ? o['QUẬN/HUYỆN NHẬN'] + ', ' : ''}<b>${o['TỈNH NHẬN'] || ''}</b></div>
+            </td>
+            <td class="py-2.5 px-3 text-center">${o.statusBadge}</td>
+            <td class="py-2.5 px-3 text-slate-600">
+              <span class="text-[10px] text-slate-400">Lấy:</span> ${o['NGÀY LẤY HÀNG'] || '-'}<br>
+              <span class="text-indigo-600 font-bold text-[10px]">Mốc 0h:</span> ${formatDate(o.slaStart) || '-'}
+            </td>
+            <td class="py-2.5 px-3 text-center font-black text-slate-700">${o.maxH}h</td>
+            <td class="py-2.5 px-3 w-48">
+              ${progress}
+              <div class="flex justify-between text-[10px] mt-1 font-bold">
+                <span class="${['OVERDUE','DELIVERED_LATE'].includes(o.category)?'text-red-600':'text-slate-600'}">Đã qua: ${o.elapsedH}h</span>
+                <span class="text-slate-400">Cam kết: ${o.maxH}h</span>
+              </div>
+            </td>
+            <td class="py-2.5 px-3">${badge}</td>
+            <td class="py-2.5 px-3 text-center">
+              <button onclick="quickSearchContact('${o['TỈNH NHẬN']}')" class="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition" title="Tra cứu nhanh điều phối khu vực này">
+                <i class="fa-solid fa-phone-volume"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function exportExcel() {
+      if (analyzedData.length === 0) return alert('Chưa có dữ liệu để xuất file.');
+      const val = document.getElementById('filterSelect').value;
+      const data = analyzedData.filter(o => {
+        if (val === 'ALL') return true;
+        if (val === 'SAFE_AND_OK') return o.category === 'SAFE' || o.category === 'DELIVERED_OK';
+        return o.category === val;
+      }).map((o, idx) => ({
+        'STT': idx + 1,
+        'MÃ VẬN ĐƠN': o['MÃ VẬN ĐƠN'],
+        'DỊCH VỤ': o['DỊCH VỤ'],
+        'TỈNH NHẬN': o['TỈNH NHẬN'],
+        'QUẬN/HUYỆN NHẬN': o['QUẬN/HUYỆN NHẬN'],
+        'TRẠNG THÁI': o['TRẠNG THÁI'],
+        'NGÀY LẤY HÀNG': o['NGÀY LẤY HÀNG'],
+        'MỐC TÍNH SLA (0h)': formatDate(o.slaStart),
+        'SLA CAM KẾT (Giờ)': o.maxH,
+        'THỜI GIAN ĐO ĐƯỢC (Giờ)': o.elapsedH,
+        'GIAO CHẬM (Ngày)': o.diffH > 0 ? (o.diffH / 24).toFixed(1) : 0,
+        'CẢNH BÁO AI': o.category === 'OVERDUE' ? 'ĐANG TRỄ LƯU THÔNG' : (o.category === 'DELIVERED_LATE' ? 'ĐÃ GIAO NHƯNG BỊ CHẬM' : (o.category === 'AT_RISK' ? 'SẮP TRỄ' : 'AN TOÀN / ĐẠT')),
+        'NGƯỜI NHẬN': o['NGƯỜI NHẬN'],
+        'SĐT NHẬN': o['SDT NGƯỜI NHẬN'],
+        'ĐỊA CHỈ NHẬN': o['ĐỊA CHỈ NHẬN']
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "BaoCao_SLA_Leadtime");
+      XLSX.writeFile(wb, `BaoCao_SLA_Leadtime_DaNang_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    // AI CONTACTS CHATBOT LOGIC
+    function toggleChatbot() {
+      const cw = document.getElementById('chatbot-window');
+      cw.classList.toggle('active');
+    }
+
+    function quickSearchContact(prov) {
+      if (!prov) return;
+      const cw = document.getElementById('chatbot-window');
+      if (!cw.classList.contains('active')) cw.classList.add('active');
+      appendMessage(true, `Tra cứu bưu cục tỉnh: ${prov}`);
+      setTimeout(() => searchContacts(prov), 300);
+    }
+
+    function appendMessage(isUser, text) {
+      const chat = document.getElementById('chat-messages');
+      if (isUser) {
+        chat.innerHTML += `
+          <div class="flex gap-2 w-full justify-end">
+            <div class="chat-bubble bg-indigo-600 text-white p-2.5 rounded-2xl rounded-tr-sm shadow-sm">${text}</div>
+          </div>
+        `;
+      } else {
+        chat.innerHTML += `
+          <div class="flex gap-2 w-full">
+            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-600"><i class="fa-solid fa-robot"></i></div>
+            <div class="chat-bubble bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-sm shadow-sm text-slate-700 w-full">${text}</div>
+          </div>
+        `;
+      }
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const val = input.value.trim();
+      if (!val) return;
+      
+      appendMessage(true, val);
+      input.value = '';
+      
+      setTimeout(() => searchContacts(val), 300);
+    }
+
+    // Helper: remove accents for fuzzy matching
+    function removeAccents(str) {
+      if (!str) return '';
+      return str.normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .toLowerCase().trim();
+    }
+
+    function searchContacts(query) {
+      const rawQ = query.trim();
+      const qNoAcc = removeAccents(rawQ);
+      
+      // PRIORITY 1: Search in DB_PROVINCES (Column A of both sheets)
+      let matchedProvinces = [];
+      
+      for (const prov of DB_PROVINCES) {
+        const fullTinhNoAcc = removeAccents(prov.tinh);
+        const tinhCleanNoAcc = fullTinhNoAcc.replace('tinh ', '').replace('thanh pho ', '').replace('tp. ', '').replace('tp ', '').trim();
+        
+        // Exact or substring match with province name
+        if (qNoAcc === tinhCleanNoAcc || qNoAcc === fullTinhNoAcc || fullTinhNoAcc.includes(qNoAcc) || (qNoAcc.length >= 3 && tinhCleanNoAcc.includes(qNoAcc))) {
+          matchedProvinces.push(prov);
+        }
+      }
+
+      // PRIORITY 2: If no direct province match, search across post office names inside provinces
+      if (matchedProvinces.length === 0) {
+        for (const prov of DB_PROVINCES) {
+          const hasBcMatch = prov.buu_cucs.some(bc => removeAccents(bc.buu_cuc).includes(qNoAcc));
+          if (hasBcMatch) {
+            matchedProvinces.push(prov);
+          }
+        }
+      }
+
+      if (matchedProvinces.length > 0) {
+        matchedProvinces.forEach(p => {
+          let resText = `
+            <div class="border-b pb-2 mb-2">
+              <div class="flex items-center justify-between">
+                <h4 class="font-bold text-indigo-900 text-[13px]"><i class="fa-solid fa-map-pin text-red-500 mr-1"></i>${p.tinh}</h4>
+                <span class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded border border-indigo-100">${p.buu_cucs.length} bưu cục / kho</span>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-0.5 font-medium">Khu vực: <b>${p.region}</b></p>
+            </div>
+          `;
+
+          // Management & Operational Leadership
+          if (p.tp_vh || p.giam_doc) {
+            resText += `
+              <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 mb-2.5 space-y-1.5 text-[11px]">
+                ${p.tp_vh ? `<div><span class="text-indigo-800 font-bold"><i class="fa-solid fa-user-tie mr-1"></i>TP Vận Hành Tỉnh:</span><div class="text-slate-700 pl-4 whitespace-pre-line">${p.tp_vh}</div></div>` : ''}
+                ${p.giam_doc ? `<div class="pt-1 border-t border-slate-200/60"><span class="text-blue-900 font-bold"><i class="fa-solid fa-briefcase mr-1"></i>Giám Đốc Chi Nhánh:</span><div class="text-slate-700 pl-4 whitespace-pre-line">${p.giam_doc}</div></div>` : ''}
+              </div>
+            `;
+          }
+
+          // Post Offices (Bưu Cục) Details
+          resText += `
+            <div class="text-[11px] font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span>Danh Sách Bưu Cục & Điều Phối:</span>
+            </div>
+            <div class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+          `;
+
+          p.buu_cucs.forEach((bc, idx) => {
+            resText += `
+              <div class="p-2 rounded-lg border border-slate-100 bg-white shadow-xs hover:border-indigo-200 transition text-[11px]">
+                <div class="font-bold text-slate-800 flex items-center justify-between">
+                  <span><i class="fa-solid fa-building mr-1 text-indigo-500"></i>${bc.buu_cuc || 'Bưu cục ' + (idx+1)}</span>
+                </div>
+                
+                <div class="mt-1 grid grid-cols-1 gap-1 text-[10.5px]">
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-600">Đ/Phối: <b>${bc.dieu_phoi || 'Chưa cập nhật'}</b></span>
+                    ${bc.sdt_dp ? `<a href="tel:${bc.sdt_dp}" class="text-blue-600 hover:underline font-mono font-bold flex items-center gap-1"><i class="fa-solid fa-phone text-[9px]"></i>${bc.sdt_dp}</a>` : '<span class="text-slate-400">N/A</span>'}
+                  </div>
+                  
+                  ${bc.van_hanh ? `
+                  <div class="flex items-center justify-between pt-0.5 border-t border-slate-50">
+                    <span class="text-slate-500">Vận hành: <b>${bc.van_hanh}</b></span>
+                    ${bc.sdt_vh ? `<a href="tel:${bc.sdt_vh}" class="text-emerald-600 hover:underline font-mono font-bold flex items-center gap-1"><i class="fa-solid fa-phone text-[9px]"></i>${bc.sdt_vh}</a>` : '<span class="text-slate-400">N/A</span>'}
+                  </div>` : ''}
+                </div>
+              </div>
+            `;
+          });
+
+          resText += `</div>`;
+          appendMessage(false, resText);
+        });
+      } else {
+        appendMessage(false, `Không tìm thấy tỉnh hoặc bưu cục nào khớp với "<b>${rawQ}</b>". Bạn vui lòng gõ đúng tên Tỉnh/Thành (Ví dụ: <i>Khánh Hòa, Phú Thọ, Hà Nam, Nam Định, Nghệ An, Hồ Chí Minh, Đồng Nai...</i>).`);
+      }
+    }
+  </script>
+
+  <!-- MOBILE BOTTOM STICKY ACTION BAR -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-2 z-30 flex items-center justify-around shadow-lg">
+    <button onclick="switchMobileTab('dashboard')" id="bottomNavDash" class="flex flex-col items-center gap-1 text-blue-600 font-bold text-[11px]">
+      <i class="fa-solid fa-chart-line text-lg"></i>
+      <span>SLA Monitor</span>
+    </button>
+    <button onclick="switchMobileTab('upload')" id="bottomNavUpload" class="flex flex-col items-center gap-1 text-slate-400 font-medium text-[11px]">
+      <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+      <span>Nạp File</span>
+    </button>
+    <button onclick="toggleChatbot()" class="flex flex-col items-center gap-1 text-indigo-600 font-bold text-[11px]">
+      <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center -mt-3 shadow-md">
+        <i class="fa-solid fa-headset text-sm"></i>
+      </div>
+      <span>Danh Bạ AI</span>
+    </button>
+  </nav>
+
+  <script>
+    function switchMobileTab(tab) {
+      const sidebar = document.getElementById('sidebarPanel');
+      const main = document.getElementById('mainDashboardPanel');
+      const btnDash = document.getElementById('tabBtnDashboard');
+      const btnUp = document.getElementById('tabBtnUpload');
+      const navDash = document.getElementById('bottomNavDash');
+      const navUp = document.getElementById('bottomNavUpload');
+
+      if (tab === 'upload') {
+        sidebar.classList.remove('hidden');
+        main.classList.add('hidden');
+        if (btnDash) btnDash.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 transition flex items-center justify-center gap-1.5';
+        if (btnUp) btnUp.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition flex items-center justify-center gap-1.5';
+        if (navDash) navDash.className = 'flex flex-col items-center gap-1 text-slate-400 font-medium text-[11px]';
+        if (navUp) navUp.className = 'flex flex-col items-center gap-1 text-blue-600 font-bold text-[11px]';
+      } else {
+        sidebar.classList.add('hidden');
+        main.classList.remove('hidden');
+        if (btnDash) btnDash.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition flex items-center justify-center gap-1.5';
+        if (btnUp) btnUp.className = 'flex-1 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 transition flex items-center justify-center gap-1.5';
+        if (navDash) navDash.className = 'flex flex-col items-center gap-1 text-blue-600 font-bold text-[11px]';
+        if (navUp) navUp.className = 'flex flex-col items-center gap-1 text-slate-400 font-medium text-[11px]';
+      }
+    }
+  </script>
+
+</body>
+</html>
